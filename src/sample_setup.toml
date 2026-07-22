@@ -1,0 +1,21 @@
+[[subphase]]
+phase = "reading"
+name = "gallery"
+match = [
+    "generating gallery",
+    "running example",
+]
+
+[[subphase]]
+phase = "reading"
+name = "myst"
+match = [
+    "myst",
+]
+
+[[subphase]]
+phase = "writing"
+name = "search index"
+match = [
+    "dumping search index",
+]

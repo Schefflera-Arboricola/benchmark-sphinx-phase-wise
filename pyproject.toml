@@ -1,0 +1,18 @@
+[project]
+name = "benchmark-sphinx-phase-wise"
+version = "0.1.0"
+description = "To benchmark the sphinx docs build process phase-wise"
+license = {text = "BSD-3-Clause"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "sphinx>=9.1.0",
+]
+
+[[project.authors]]
+name = "Aditi Juneja"
+email = "aditijuneja7@gmail.com"
+
+[project.urls]
+"Bug Tracker" = 'https://github.com/Schefflera-Arboricola/benchmark-sphinx-phase-wise/issues'
+"Source Code" = 'https://github.com/Schefflera-Arboricola/benchmark-sphinx-phase-wise'
