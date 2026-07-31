@@ -11,8 +11,10 @@ PHASES = [
     ("Initialization", "config-inited", "env-before-read-docs"),
     ("Reading", "env-before-read-docs", "env-updated"),
     ("Consistency", "env-updated", "env-check-consistency"),
-    # ("Resolving", "env-check-consistency", "write-started"), # doctree-resolved
-    ("Writing", "write-started", "build-finished"),
+    ("Pre-writing", "env-check-consistency", "write-started"),
+    ("Resolving", "write-started", "doctree-resolved"),
+    ("Writing", "doctree-resolved", "build-finished"),
+    # or ("Resolving+Writing", "write-started", "build-finished"),
 ]
 
 
@@ -45,16 +47,20 @@ def env_before_read_docs(app: Sphinx, env, docnames) -> None:
     bench.mark("env-before-read-docs")
 
 
-def env_check_consistency(app: Sphinx, env) -> None:
-    bench.mark("env-check-consistency")
-
-
 def env_updated(app: Sphinx, env) -> None:
     bench.mark("env-updated")
 
 
+def env_check_consistency(app: Sphinx, env) -> None:
+    bench.mark("env-check-consistency")
+
+
 def write_started(app: Sphinx, builder) -> None:
     bench.mark("write-started")
+
+
+def doctree_resolved(app: Sphinx, doctree, docname) -> None:
+    bench.mark("doctree-resolved")
 
 
 def build_finished(app: Sphinx, exception: Exception | None) -> None:
@@ -98,9 +104,10 @@ def build_finished(app: Sphinx, exception: Exception | None) -> None:
 def setup(app: Sphinx):
     app.connect("config-inited", config_inited)
     app.connect("env-before-read-docs", env_before_read_docs)
-    app.connect("env-check-consistency", env_check_consistency)
     app.connect("env-updated", env_updated)
+    app.connect("env-check-consistency", env_check_consistency)
     app.connect("write-started", write_started)
+    app.connect("doctree-resolved", doctree_resolved)
     app.connect("build-finished", build_finished)
 
     return {

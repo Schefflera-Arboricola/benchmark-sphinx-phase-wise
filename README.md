@@ -17,19 +17,39 @@ For Matplotlib docs build:
 Sphinx phase-wise benchmarks
 ==================================================
 
-Initialization :  446.999 s
-Reading        :  215.299 s
+Initialization :  452.402 s
+Reading        :  207.971 s
 Consistency    :    0.699 s
-Writing        :  172.083 s
+Pre-writing    :    0.000 s
+Resolving      :  180.908 s
+Writing        :    7.531 s
 
 --------------------------------------------------
-Total          :  835.080 s
+Total          :  849.511 s
 ```
 
 For NumPy docs build:
 
 ```bash
+ToDo
+```
 
+For NetworkX docs build:
+
+```bash
+==================================================
+Sphinx phase-wise benchmarks
+==================================================
+
+Initialization :  112.857 s
+Reading        :   50.288 s
+Consistency    :    0.270 s
+Pre-writing    :    0.000 s
+Resolving      :   14.329 s
+Writing        :   56.618 s
+
+--------------------------------------------------
+Total          :  234.362 s
 ```
 
 For CPython docs build:
