@@ -1,117 +1,166 @@
 from __future__ import annotations
 
-from pathlib import Path
+import json
+
+from collections import Counter, defaultdict
+from dataclasses import dataclass, asdict
 from time import perf_counter
 
 from sphinx.application import Sphinx
 
-
-# tuple --> (Phase mame, Start event, End event)
-PHASES = [
-    ("Initialization", "config-inited", "env-before-read-docs"),
-    ("Reading", "env-before-read-docs", "env-updated"),
-    ("Consistency", "env-updated", "env-check-consistency"),
-    ("Pre-writing", "env-check-consistency", "write-started"),
-    ("Resolving", "write-started", "doctree-resolved"),
-    ("Writing", "doctree-resolved", "build-finished"),
-    # or ("Resolving+Writing", "write-started", "build-finished"),
+# Safe notification-style events only
+EVENTS = [
+    "config-inited",
+    "builder-inited",
+    # "env-get-outdated",
+    "env-before-read-docs",
+    "env-purge-doc",
+    "source-read",
+    "include-read",
+    "doctree-read",
+    "env-merge-info",
+    "env-updated",
+    # "env-get-updated",
+    "env-check-consistency",
+    "write-started",
+    "doctree-resolved",
+    # "missing-reference",
+    "warn-missing-reference",
+    # "html-collect-pages",
+    "object-description-transform",
+    # "html-page-context",
+    "linkcheck-process-uri",
+    "build-finished",
 ]
 
 
-class PhaseBenchmark:
-    def __init__(self) -> None:
-        self.start_time: float | None = None
-        self.timestamps: dict[str, float] = {}
+@dataclass
+class Event:
+    name: str
+    call: int  # indicates n_th call of this event (1st, 2nd, ...)
+    start: float
+    duration: float = 0.0
+    # ToDo - Add more fields like:
+    # extension: str | None = None
+    # threads: int | None = None
 
-    def start(self) -> None:
+
+class EventLogger:
+    def __init__(self):
+        self.events: list[Event] = []
+        self.start_time: float | None = None
+        # todo: need to end an end-time as well to calculate the time dor last event
+        self.call_counts = Counter()
+
+    def start(self):
         self.start_time = perf_counter()
 
-    def mark(self, event: str) -> None:
-        self.timestamps[event] = perf_counter()
+    def record(self, name: str):
+        now = perf_counter()
 
-    def duration(self, start: str, end: str) -> float:
-        return self.timestamps[end] - self.timestamps[start]
+        self.call_counts[name] += 1
 
-
-bench = PhaseBenchmark()
-
-# Event callbacks
-
-
-def config_inited(app: Sphinx, *args) -> None:
-    bench.start()
-    bench.mark("config-inited")
-
-
-def env_before_read_docs(app: Sphinx, env, docnames) -> None:
-    bench.mark("env-before-read-docs")
-
-
-def env_updated(app: Sphinx, env) -> None:
-    bench.mark("env-updated")
-
-
-def env_check_consistency(app: Sphinx, env) -> None:
-    bench.mark("env-check-consistency")
-
-
-def write_started(app: Sphinx, builder) -> None:
-    bench.mark("write-started")
-
-
-def doctree_resolved(app: Sphinx, doctree, docname) -> None:
-    bench.mark("doctree-resolved")
-
-
-def build_finished(app: Sphinx, exception: Exception | None) -> None:
-    bench.mark("build-finished")
-
-    lines = [
-        "=" * 50,
-        "Sphinx phase-wise benchmarks",
-        "=" * 50,
-        "",
-    ]
-
-    for phase, start, end in PHASES:
-        if start not in bench.timestamps or end not in bench.timestamps:
-            lines.append(f"{phase:<15}: Not recorded")
-            continue
-
-        lines.append(f"{phase:<15}: {bench.duration(start, end):8.3f} s")
-
-    if bench.start_time is not None:
-        total = perf_counter() - bench.start_time
-        lines.extend(
-            [
-                "",
-                "-" * 50,
-                f"{'Total':<15}: {total:8.3f} s",
-            ]
+        self.events.append(
+            Event(
+                name=name,
+                call=self.call_counts[name],
+                start=now - self.start_time,
+            )
         )
 
-    output = "\n".join(lines)
+    def finalize(self):
+        self.events.sort(key=lambda e: e.start)
 
-    log_file = Path(app.outdir) / "phase_wise_benchmarks.log"
-    log_file.write_text(output, encoding="utf-8")
+        # Duration is time until the next event is triggered
+        for current, nxt in zip(self.events, self.events[1:]):
+            current.duration = nxt.start - current.start
 
-    print("\n" + output)
+    def totals(self):
+        """Summarize total time spent in each event type."""
+        totals = defaultdict(float)
+
+        for event in self.events:
+            totals[event.name] += event.duration
+
+        return dict(totals)
+
+    def write_json(self, filename="event_trace.json"):
+        self.finalize()
+        with open(filename, "w") as f:
+            json.dump(
+                {
+                    "events": [asdict(event) for event in self.events],
+                    "totals": self.totals(),
+                },
+                f,
+                indent=2,
+            )
+
+    def print_summary(self):
+        """To display the benchmarking summary table at the end"""
+        totals = self.totals()
+
+        total_build_time = sum(totals.values())
+
+        rows = []
+
+        for event in sorted(totals):
+            total = totals[event]
+            calls = self.call_counts[event]
+
+            rows.append(
+                (
+                    event,
+                    calls,
+                    total,
+                    total / calls if calls else 0,
+                    100 * total / total_build_time if total_build_time else 0,
+                )
+            )
+
+        rows.sort(key=lambda row: row[2], reverse=True)
+
+        header = (
+            f"{'Event':35}{'Calls':>10}{'Total(s)':>15}{'Avg(ms)':>15}{'%Build':>10}"
+        )
+
+        print()
+        print(header)
+        print("-" * len(header))
+
+        for event, calls, total, avg, pct in rows:
+            print(f"{event:35}{calls:10d}{total:15.6f}{avg * 1000:15.3f}{pct:9.2f}%")
 
 
-# Extension setup
+recorder = EventLogger()
+
+
+def make_callback(event_name):
+    def callback(app, *args, **kwargs):
+        recorder.record(event_name)
+
+    return callback
+
+
+def build_finished(app, exception):
+    recorder.write_json()
+    print("event_trace.json written")
+    recorder.print_summary()
 
 
 def setup(app: Sphinx):
-    app.connect("config-inited", config_inited)
-    app.connect("env-before-read-docs", env_before_read_docs)
-    app.connect("env-updated", env_updated)
-    app.connect("env-check-consistency", env_check_consistency)
-    app.connect("write-started", write_started)
-    app.connect("doctree-resolved", doctree_resolved)
-    app.connect("build-finished", build_finished)
-
+    recorder.start()
+    for event in EVENTS:
+        app.connect(
+            event,
+            make_callback(event),
+        )
+    app.connect(
+        "build-finished",
+        build_finished,
+    )
     return {
-        "version": "0.1.0",
-        "parallel_read_safe": True,
-        "parallel_write_safe": True,
+        "version": "0.1",
+        "parallel_read_safe": False,
+        "parallel_write_safe": False,
     }
