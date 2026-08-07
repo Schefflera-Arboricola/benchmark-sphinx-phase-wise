@@ -49,6 +49,7 @@ class EventLogger:
     def __init__(self):
         self.events: list[Event] = []
         self.start_time: float | None = None
+        # todo: need to end an end-time as well to calculate the time dor last event
         self.call_counts = Counter()
 
     def start(self):
