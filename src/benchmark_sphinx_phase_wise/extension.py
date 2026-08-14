@@ -66,6 +66,16 @@ class HandlerCall:
     duration: float
 
 
+@dataclass
+class Event:
+    """Records the total time spent in a single event emission (including all its listeners and any gaps between them)."""
+
+    event_name: str
+    call: int
+    start: float
+    duration: float
+
+
 class EventLogger:
     """Records and reports per-handler timing data for a single build.
 
@@ -78,6 +88,9 @@ class EventLogger:
     calls : list of HandlerCall
         Every recorded handler call for the current build, in the order
         they were recorded. These records are later stored in a json.
+    events : list of Event
+        Every recorded event emission for the current build, in the order
+        they were recorded. These records are later stored in a json.
     start_time : float or None
         The :func:`time.perf_counter` value captured when :meth:`start`
         was called, used as the zero point for relative timings.
@@ -85,12 +98,23 @@ class EventLogger:
     call_counts : collections.Counter
         Number of calls per ``(event, handler)`` pair; used to
         assign the ``call`` attribute of each :class:`HandlerCall`.
+    event_call_counts : collections.Counter
+        Number of calls per ``event_name``; used to assign the ``call``
+        attribute of each :class:`Event`.
+    total_wall_time : float
+        Total wall-clock time of the build, as measured by
+        ``perf_counter() - start_time``. This is not the same as the
+        sum of all recorded handler durations, because there may be
+        gaps between handler calls.
     """
 
     def __init__(self) -> None:
         self.calls: list[HandlerCall] = []
+        self.events: list[Event] = []
         self.start_time: float | None = None
         self.call_counts: Counter = Counter()
+        self.event_call_counts: Counter = Counter()
+        self.total_wall_time: float = 0.0
 
     def start(self) -> None:
         """Reset all recorded state and mark the start of a new build.
@@ -102,7 +126,9 @@ class EventLogger:
         previous build into the current benchmark.
         """
         self.calls = []
+        self.events = []
         self.call_counts = Counter()
+        self.event_call_counts = Counter()
         self.start_time = perf_counter()
 
     def record(
@@ -154,6 +180,31 @@ class EventLogger:
             )
         )
 
+    def record_event(
+        self, event_name: str, start_offset: float, duration: float
+    ) -> None:
+        """Record one completed event emission (full wall-clock time of the
+        emit() or emit_firstresult() call, including all its listeners and any gaps between them).
+
+        Parameters
+        ----------
+        event_name : str
+            Name of the emitted event.
+        start_offset : float
+            Seconds since :attr:`start_time` at which this emit began.
+        duration : float
+            Seconds the whole emit() call took.
+        """
+        self.event_call_counts[event_name] += 1
+        self.events.append(
+            Event(
+                event_name=event_name,
+                call=self.event_call_counts[event_name],
+                start=start_offset,
+                duration=duration,
+            )
+        )
+
     def totals_by_handler(self) -> dict[tuple[str, str], float]:
         """Adds the handler function call durations for each ``(event, handler)`` pair.
 
@@ -169,13 +220,24 @@ class EventLogger:
             totals[(c.event, c.handler)] += c.duration
         return totals
 
+    def totals_by_event(self) -> dict[str, float]:
+        """Total recorded emit() time per event, across all its emissions."""
+        totals: dict[str, float] = defaultdict(float)
+        for e in self.events:
+            totals[e.event_name] += e.duration
+        return totals
+
     def write_json(self, filename: str = "sphinx_benchmarks.json") -> None:
         """Write all recorded handler calls to a JSON file.
 
-        The json has a single top-level key, ``"calls"``, whose value
-        is a list of the recorded :class:`HandlerCall` entries (as
+        The json has a two top-level keys:
+
+        ``"calls"`` is a list of the recorded :class:`HandlerCall` entries (as
         plain dicts, via :func:`dataclasses.asdict`), one per handler
         function call.
+
+        ``"events"`` is a list of the recorded :class:`Event` entries (as
+        plain dicts, via :func:`dataclasses.asdict`), one per event emission.
 
         Parameters
         ----------
@@ -184,46 +246,43 @@ class EventLogger:
             Defaults to ``"sphinx_benchmarks.json"``.
         """
         with open(filename, "w") as f:
-            json.dump({"calls": [asdict(c) for c in self.calls]}, f, indent=2)
+            json.dump(
+                {
+                    "calls": [asdict(c) for c in self.calls],
+                    "events": [asdict(e) for e in self.events],
+                },
+                f,
+                indent=2,
+            )
 
     def print_summary(self) -> None:
         """Print a grouped, sorted timing summary to stdout.
 
         Handlers are grouped by the event they're connected to. Each
         event group is headed by the event's name, its total recorded
-        time, and its percentage share of total recorded build time;
+        time, and its percentage share of total build wall-clock time;
         within a group, handlers are listed sorted by their own total
         time, highest first. Event groups themselves are ordered by
         their percentage share of total build time, highest first.
-
-        Notes
-        -----
-        "Total build time" here means the sum of all recorded handler
-        durations, not Sphinx's true wall-clock build time -- gaps
-        between handler calls (e.g. time in file I/O between events)
-        are not included!
         """
-        totals = self.totals_by_handler()
-        total_build_time = sum(totals.values()) or 1.0
+        handler_totals = self.totals_by_handler()
+        event_totals = self.totals_by_event()
+        sum_of_events = sum(event_totals.values())
+        total_build_time = self.total_wall_time or sum_of_events or 1.0
 
-        # look up kind/extension for each (event, handler)
         meta: dict[tuple[str, str], tuple[str, str, str | None]] = {}
         for c in self.calls:
             meta[(c.event, c.handler)] = (c.module, c.kind, c.extension)
 
-        # group handler totals by event
         by_event: dict[str, list[tuple[str, str, str, int, float, float]]] = (
             defaultdict(list)
         )
-        event_totals: dict[str, float] = defaultdict(float)
-        for (event, handler), total in totals.items():
+        for (event, handler), total in handler_totals.items():
             calls = self.call_counts[(event, handler)]
             _module, kind, ext = meta[(event, handler)]
             avg = total / calls if calls else 0.0
             by_event[event].append((handler, kind, ext or "-", calls, total, avg))
-            event_totals[event] += total
 
-        # sort events by their share of total build time, max to min
         ordered_events = sorted(
             event_totals, key=lambda e: event_totals[e], reverse=True
         )
@@ -235,6 +294,7 @@ class EventLogger:
         width = len(col_header)
 
         print()
+        print("Build time: ", total_build_time)
         for event in ordered_events:
             ev_total = event_totals[event]
             ev_pct = 100 * ev_total / total_build_time
@@ -244,13 +304,27 @@ class EventLogger:
             print(col_header)
             print("-" * width)
 
-            handlers = sorted(by_event[event], key=lambda r: r[4], reverse=True)
+            handlers = sorted(by_event.get(event, []), key=lambda r: r[4], reverse=True)
             for handler, kind, ext, calls, total, avg in handlers:
                 print(
                     f"  {handler[:49]:50}{kind:20}{ext[:39]:40}"
                     f"{calls:10d}{total:15.6f}{avg * 1000:15.3f}"
                 )
+            handler_sum = sum(r[4] for r in handlers)
+            print("-" * width)
+            print(f"  {'(sum of handlers)':50}{'':20}{'':40}{'':10}{handler_sum:15.6f}")
+            print(
+                f"  {'(unaccounted overhead)':50}{'':20}{'':40}{'':10}{ev_total - handler_sum:15.6f}"
+            )
             print()
+
+        print("=" * width)
+        print(
+            f"Sum of durations of all events: {sum_of_events:.6f}s   "
+            f"Wall clock: {total_build_time:.6f}s   "
+            f"Outside any event: {total_build_time - sum_of_events:.6f}s "
+            f"({100 * (total_build_time - sum_of_events) / total_build_time:.2f}%)"
+        )
 
 
 recorder = EventLogger()
@@ -398,6 +472,37 @@ def wrap_all_listeners(app: Sphinx, *_args) -> None:
         ]
 
 
+def wrap_emit(app: Sphinx, *_args) -> None:
+    """Wrap ``app.events.emit`` so the full cost of each event emission
+    (all listeners plus any Sphinx-internal overhead between them) is
+    recorded, not just the sum of the wrapped handlers' own durations.
+
+    Parameters
+    ----------
+    app : sphinx.application.Sphinx
+        The running Sphinx application whose ``app.events.emit`` should
+        be wrapped in place.
+    *_args
+        Extra positional arguments Sphinx passes when this is connected
+        directly as an event handler.
+    """
+    original_emit = app.events.emit
+    original_emit_firstresult = app.events.emit_firstresult
+
+    def wrapped(original, event_name, *args, **kwargs):
+        t0 = perf_counter()
+        start_offset = t0 - (recorder.start_time or t0)
+        try:
+            return original(event_name, *args, **kwargs)
+        finally:
+            recorder.record_event(event_name, start_offset, perf_counter() - t0)
+
+    app.events.emit = lambda name, *a, **kw: wrapped(original_emit, name, *a, **kw)
+    app.events.emit_firstresult = lambda name, *a, **kw: wrapped(
+        original_emit_firstresult, name, *a, **kw
+    )
+
+
 def build_finished(app: Sphinx, exception) -> None:
     """Write the collected benchmarks and print the summary at the end of the build.
 
@@ -410,6 +515,7 @@ def build_finished(app: Sphinx, exception) -> None:
         for a successful build. Unused, but received because
         Sphinx always passes it to ``build-finished`` handlers.
     """
+    recorder.total_wall_time = perf_counter() - (recorder.start_time or perf_counter())
     recorder.write_json()
     print("sphinx_benchmarks.json written")
     recorder.print_summary()
@@ -418,6 +524,7 @@ def build_finished(app: Sphinx, exception) -> None:
 def setup(app: Sphinx):
     """Sphinx extension entry point."""
     recorder.start()
+    wrap_emit(app)
 
     # By the time config-inited is emitted, every extension's setup(app) has
     # already run app.connect() for its own handlers, so this catches
