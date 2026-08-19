@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, asdict
 from time import perf_counter
 from typing import Any, Callable
-
+from functools import wraps
 from sphinx.application import Sphinx
 from importlib.metadata import entry_points
 
@@ -419,6 +419,7 @@ def wrap_listener(app: Sphinx, event_name: str, listener):
     )
     module = getattr(orig_handler, "__module__", "unknown")
 
+    @wraps(orig_handler)
     def wrapped(app_arg, *args, **kwargs):
         t0 = perf_counter()
         start_offset = t0 - (recorder.start_time or t0)
@@ -437,9 +438,11 @@ def wrap_listener(app: Sphinx, event_name: str, listener):
             )
 
     setattr(wrapped, _WRAP_FLAG, True)
-    wrapped.__name__ = getattr(orig_handler, "__name__", "handler")
-    wrapped.__qualname__ = handler_name
-    wrapped.__module__ = module
+    if not hasattr(orig_handler, "__qualname__"):
+        # for handlers that aren't simple functions (partials, callable objects, etc.)
+        # have no qualname/name for @wraps to copy, so setting those explicitly
+        wrapped.__name__ = handler_name
+        wrapped.__qualname__ = handler_name
 
     return listener._replace(handler=wrapped)
 
