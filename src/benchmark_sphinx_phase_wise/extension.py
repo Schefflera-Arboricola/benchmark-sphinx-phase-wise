@@ -7,17 +7,10 @@ from time import perf_counter
 from typing import Any, Callable
 
 from sphinx.application import Sphinx
+from importlib.metadata import entry_points
 
-# Some common theme packages
-# todo: better way to identify themes
 THEME_PACKAGES = {
-    "alabaster",
-    "sphinx_rtd_theme",
-    "sphinx_book_theme",
-    "furo",
-    "pydata_sphinx_theme",
-    "sphinx_material",
-    "sphinx_immaterial",
+    ep.module.split(".")[0] for ep in entry_points(group="sphinx.html_themes")
 }
 
 
@@ -44,8 +37,9 @@ class HandlerCall:
         ``"extension"``, ``"sphinx-internal"``, ``"theme"``, or
         ``"unknown"``.
     extension : str or None
-        Name of the extension the handler belongs to, if ``kind="extension"``;
-        otherwise ``None``.
+        Origin package of the handler: extension name for
+        ``kind="extension"``, theme package for ``kind="theme"``,
+        top-level module for ``kind="unknown"``, ``None`` otherwise.
     call : int
         Number of call for the specific ``(event, handler)`` pair
         (1 for the first time this handler ran for this event, 2 for the
@@ -288,7 +282,7 @@ class EventLogger:
         )
 
         col_header = (
-            f"  {'Handler':50}{'Kind':20}{'Ext':40}"
+            f"  {'Handler':50}{'Kind':20}{'Ext/Module':40}"
             f"{'Calls':>10}{'Total(s)':>15}{'Avg(ms)':>15}"
         )
         width = len(col_header)
@@ -355,8 +349,10 @@ def classify_handler(
         One of ``"sphinx-internal"``, ``"extension"``, ``"theme"``, or
         ``"unknown"``.
     extension : str or None
-        The matching extension's name if ``kind="extension"``;
-        otherwise ``None``.
+        The extension's name if ``kind="extension"``, the theme's
+        top-level package if ``kind="theme"``, the handler's top-level
+        module if ``kind="unknown"``, and ``None`` for sphinx-internal
+        handlers (or when the module is unavailable).
     """
     module = getattr(handler, "__module__", "") or ""
     top = module.split(".")[0]
@@ -364,15 +360,17 @@ def classify_handler(
     if module == "sphinx" or module.startswith("sphinx."):
         return "sphinx-internal", None
 
+    # Checked before extensions: most themes also register a setup(), so they
+    # appear in app.extensions and would otherwise be classified as extensions.
+    if top in THEME_PACKAGES:
+        return "theme", top
+
     for ext_name, ext in app.extensions.items():
         ext_top = ext.module.__name__.split(".")[0]
         if ext_top == top:
             return "extension", ext_name
 
-    if top in THEME_PACKAGES:
-        return "theme", top
-
-    return "unknown", None
+    return "unknown", top or None
 
 
 def wrap_listener(app: Sphinx, event_name: str, listener):
