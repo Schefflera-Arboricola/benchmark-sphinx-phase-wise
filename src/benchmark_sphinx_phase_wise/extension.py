@@ -178,7 +178,7 @@ class EventLogger:
         self, event_name: str, start_offset: float, duration: float
     ) -> None:
         """Record one completed event emission (full wall-clock time of the
-        emit() or emit_firstresult() call, including all its listeners and any gaps between them).
+        emit() call, including all its listeners and any gaps between them).
 
         Parameters
         ----------
@@ -488,20 +488,16 @@ def wrap_emit(app: Sphinx, *_args) -> None:
         directly as an event handler.
     """
     original_emit = app.events.emit
-    original_emit_firstresult = app.events.emit_firstresult
 
-    def wrapped(original, event_name, *args, **kwargs):
+    def wrapped(event_name, *args, **kwargs):
         t0 = perf_counter()
         start_offset = t0 - (recorder.start_time or t0)
         try:
-            return original(event_name, *args, **kwargs)
+            return original_emit(event_name, *args, **kwargs)
         finally:
             recorder.record_event(event_name, start_offset, perf_counter() - t0)
 
-    app.events.emit = lambda name, *a, **kw: wrapped(original_emit, name, *a, **kw)
-    app.events.emit_firstresult = lambda name, *a, **kw: wrapped(
-        original_emit_firstresult, name, *a, **kw
-    )
+    app.events.emit = wrapped
 
 
 def build_finished(app: Sphinx, exception) -> None:
