@@ -4,7 +4,6 @@ import json
 from collections import Counter, defaultdict
 from dataclasses import dataclass, asdict
 from time import perf_counter
-from typing import Any, Callable
 from functools import wraps
 from sphinx.application import Sphinx
 from importlib.metadata import entry_points
@@ -130,8 +129,6 @@ class EventLogger:
         event: str,
         handler_name: str,
         module: str,
-        kind: str,
-        extension: str | None,
         start_offset: float,
         duration: float,
     ) -> None:
@@ -149,11 +146,6 @@ class EventLogger:
             Qualified name of the handler function.
         module : str
             Module path (separated by '.') where the handler is defined in.
-        kind : str
-            Classification of the handler's origin (``"extension"``,
-            ``"sphinx-internal"``, ``"theme"``, or ``"unknown"``).
-        extension : str or None
-            Name of the owning extension, if ``kind="extension"``.
         start_offset : float
             Seconds since :attr:`start_time` at which this call began.
         duration : float
@@ -166,8 +158,8 @@ class EventLogger:
                 event=event,
                 handler=handler_name,
                 module=module,
-                kind=kind,
-                extension=extension,
+                kind="unknown",  # will be filled in later by classify_handler
+                extension=None,  # will be filled in later by classify_handler
                 call=self.call_counts[key],
                 start=start_offset,
                 duration=duration,
@@ -198,6 +190,33 @@ class EventLogger:
                 duration=duration,
             )
         )
+
+    def classify_all_handlers(self, app: Sphinx) -> None:
+        """Classify every recorded call and set its ``kind`` and ``extension``.
+
+        Sphinx adds an extension to `app.extensions` after its `setup()`
+        returns, so classifying at the time of wrapping reports "extension"
+        as `"unknown"`.
+        """
+        all_hc = {}
+        for hc in self.calls:
+            module = hc.module
+            top = module.split(".")[0]
+            if module not in all_hc:
+                if module == "sphinx" or module.startswith("sphinx."):
+                    all_hc[module] = ("sphinx-internal", None)
+                # Checked before extensions: most themes also register a setup(), so they
+                # appear in app.extensions and would otherwise be classified as extensions.
+                elif top in THEME_PACKAGES:
+                    all_hc[module] = ("theme", top)
+                else:
+                    all_hc[module] = ("unknown", top or None)
+                    for ext_name, ext in app.extensions.items():
+                        ext_top = ext.module.__name__.split(".")[0]
+                        if ext_top == top:
+                            all_hc[module] = ("extension", ext_name)
+                            break
+            hc.kind, hc.extension = all_hc[module]
 
     def totals_by_handler(self) -> dict[tuple[str, str], float]:
         """Adds the handler function call durations for each ``(event, handler)`` pair.
@@ -327,52 +346,6 @@ recorder = EventLogger()
 _WRAP_FLAG = "_event_profiler_wrapped"
 
 
-def classify_handler(
-    app: Sphinx, handler: Callable[..., Any]
-) -> tuple[str, str | None]:
-    """Classify where an event handler function comes from.
-
-    The classification is based on the handler's ``__module__`` attribute.
-
-    Parameters
-    ----------
-    app : sphinx.application.Sphinx
-        The running Sphinx application, used to look up loaded
-        extensions via ``app.extensions``.
-    handler : callable
-        The handler function to classify (the original, unwrapped
-        callable that was registered with :meth:`app.connect`).
-
-    Returns
-    -------
-    kind : str
-        One of ``"sphinx-internal"``, ``"extension"``, ``"theme"``, or
-        ``"unknown"``.
-    extension : str or None
-        The extension's name if ``kind="extension"``, the theme's
-        top-level package if ``kind="theme"``, the handler's top-level
-        module if ``kind="unknown"``, and ``None`` for sphinx-internal
-        handlers (or when the module is unavailable).
-    """
-    module = getattr(handler, "__module__", "") or ""
-    top = module.split(".")[0]
-
-    if module == "sphinx" or module.startswith("sphinx."):
-        return "sphinx-internal", None
-
-    # Checked before extensions: most themes also register a setup(), so they
-    # appear in app.extensions and would otherwise be classified as extensions.
-    if top in THEME_PACKAGES:
-        return "theme", top
-
-    for ext_name, ext in app.extensions.items():
-        ext_top = ext.module.__name__.split(".")[0]
-        if ext_top == top:
-            return "extension", ext_name
-
-    return "unknown", top or None
-
-
 def wrap_listener(app: Sphinx, event_name: str, listener):
     """Wrap a single event listener's handler by adding a
     ``perf_counter()`` at the start and the end of the handler
@@ -411,7 +384,6 @@ def wrap_listener(app: Sphinx, event_name: str, listener):
     if getattr(orig_handler, _WRAP_FLAG, False):
         return listener  # already wrapped, don't double-wrap
 
-    kind, ext_name = classify_handler(app, orig_handler)
     handler_name = getattr(
         orig_handler,
         "__qualname__",
@@ -431,8 +403,6 @@ def wrap_listener(app: Sphinx, event_name: str, listener):
                 event_name,
                 handler_name,
                 module,
-                kind,
-                ext_name,
                 start_offset,
                 duration,
             )
@@ -471,6 +441,22 @@ def wrap_all_listeners(app: Sphinx, *_args) -> None:
             wrap_listener(app, event_name, listener)
             for listener in app.events.listeners[event_name]
         ]
+
+
+def wrap_connect(app: Sphinx) -> None:
+    """Wraps the ``app.connect`` so listeners get wrapped when registered."""
+    original_connect = app.events.connect
+
+    def wrapped(name, callback, *args, **kwargs):
+        listener_id = original_connect(name, callback, *args, **kwargs)
+        listeners = app.events.listeners[name]
+        for i, listener in enumerate(listeners):
+            if listener.id == listener_id:
+                listeners[i] = wrap_listener(app, name, listener)
+                break
+        return listener_id
+
+    app.events.connect = wrapped
 
 
 def wrap_emit(app: Sphinx, *_args) -> None:
@@ -513,6 +499,7 @@ def build_finished(app: Sphinx, exception) -> None:
         Sphinx always passes it to ``build-finished`` handlers.
     """
     recorder.total_wall_time = perf_counter() - (recorder.start_time or perf_counter())
+    recorder.classify_all_handlers(app)
     recorder.write_json()
     print("sphinx_benchmarks.json written")
     recorder.print_summary()
@@ -522,16 +509,15 @@ def setup(app: Sphinx):
     """Sphinx extension entry point."""
     recorder.start()
     wrap_emit(app)
+    wrap_all_listeners(app)
+    wrap_connect(app)
 
-    # By the time config-inited is emitted, every extension's setup(app) has
-    # already run app.connect() for its own handlers, so this catches
-    # essentially everything registered so far.
-    app.connect("config-inited", wrap_all_listeners, priority=999)
-    # Safety net for anything connected between config-inited and
-    # builder-inited (rare, but some extensions might do this).
-    app.connect("builder-inited", wrap_all_listeners, priority=999)
-
+    # the priority is set to 999  so that if any other handlers are connected
+    # with the build-finished event, then those get executed first and stored in the json.
     app.connect("build-finished", build_finished, priority=999)
+
+    # builder.cleanup() happens after build-finished
+    # maybe should wrap `app.build`?
 
     return {
         "version": "0.1",
