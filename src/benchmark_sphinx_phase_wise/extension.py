@@ -7,6 +7,9 @@ from time import perf_counter
 from functools import wraps
 from sphinx.application import Sphinx
 from importlib.metadata import entry_points
+from sphinx.util.logging import getLogger
+
+logger = getLogger(__name__)
 
 THEME_PACKAGES = {
     ep.module.split(".")[0] for ep in entry_points(group="sphinx.html_themes")
@@ -389,7 +392,19 @@ def wrap_listener(app: Sphinx, event_name: str, listener):
         "__qualname__",
         getattr(orig_handler, "__name__", repr(orig_handler)),
     )
-    module = getattr(orig_handler, "__module__", "unknown")
+    module = getattr(orig_handler, "__module__", None)
+    if module is None:
+        try:
+            file = getattr(orig_handler, "__globals__", {}).get("__file__", "")
+            module = file.split("/")[-1]  # returning file name e.g. conf.py
+        except Exception as e:
+            logger.warning(
+                "Could not determine module for handler %s: %s \nSetting `module='unknown'`.",
+                handler_name,
+                e,
+                exc_info=True,
+            )
+            module = "unknown"
 
     @wraps(orig_handler)
     def wrapped(app_arg, *args, **kwargs):
@@ -498,11 +513,16 @@ def build_finished(app: Sphinx, exception) -> None:
         for a successful build. Unused, but received because
         Sphinx always passes it to ``build-finished`` handlers.
     """
-    recorder.total_wall_time = perf_counter() - (recorder.start_time or perf_counter())
-    recorder.classify_all_handlers(app)
-    recorder.write_json()
-    print("sphinx_benchmarks.json written")
-    recorder.print_summary()
+    try:
+        recorder.total_wall_time = perf_counter() - (
+            recorder.start_time or perf_counter()
+        )
+        recorder.classify_all_handlers(app)
+        recorder.write_json()
+        print("sphinx_benchmarks.json written")
+        recorder.print_summary()
+    except Exception as e:
+        logger.warning("Benchmarking extension failed: %s", e, exc_info=True)
 
 
 def setup(app: Sphinx):
