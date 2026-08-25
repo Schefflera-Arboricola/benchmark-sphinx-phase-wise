@@ -51,4 +51,27 @@ labelled by whatever name could be recovered.
 - Wall clock time is not CPU time: caches, background processes, and network fetches all are included in the total time. Run benchmarks more than once before concluding anything.
 
 
+## How are benchmarks calculated?
+
+Nearly everything an extension does in Sphinx goes through `app.events.emit()`.
+Sphinx calls it at certain points in the build process, and it runs all the
+registered handler for that event. This extension wraps and puts timers around this path.
+
+`wrap_emit()` wraps `app.events.emit` that times the whole emission, and
+`wrap_listener()` swaps each handler for a wrapped and timed copy of it.
+So for every event you get the total time it took and the split across its handlers.
+A stack is maintained to keep track of nested event, and the child event's time is
+later subtracted so it isn't counted twice. `wrap_all_listeners()` wraps everything
+already registered when the extension loads, and `wrap_connect()` wraps
+`app.events.connect` so handlers and events registered later, also get wrapped as they are called.
+
+Each timed call becomes a `HandlerCall` record and each event emission becomes an
+`Event` record, both kept in one `EventLogger`. All times are measured from the moment
+the extension started, so everything shares a starting point.
+
+At `build-finished` (at priority 999, so other extensions' handlers gets executed first)
+the extension works out each event's own time, classify every handler with where it came from,
+and dumps everything into a JSON.
+
+
 Thank you for stopping by :)
