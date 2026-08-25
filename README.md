@@ -6,15 +6,23 @@ You can find the benchmarking outputs for different Scientific Python projects i
 
 ## How to use it?
 
-In your sphinx's `conf.py` add the following:
+1. In your sphinx's `conf.py` add the following:
 
-```python
-extensions = [
-    "benchmark_sphinx_phase_wise",
-]
-```
+   ```python
+   extensions = [
+       "benchmark_sphinx_phase_wise",
+   ]
+   ```
+   Note: being first in the list minimizes (but doesn't eliminate) the untracked starting time.
 
-Note: being first in the list minimizes (but doesn't eliminate) the untracked starting time.
+
+2. Next build the docs of your project as you would normally do.
+
+3. At the end a json gets generated and then you can run the print_summary.py script in the current/docs build directoryand see the benchmarking summary.
+
+   ```bash
+   python ../benchmark-sphinx-phase-wise/src/benchmark_sphinx_phase_wise/print_summary.py [sphinx_benchmarks.json]
+   ```
 
 
 Thank you for stopping by :)
