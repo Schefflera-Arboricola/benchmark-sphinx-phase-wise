@@ -293,15 +293,13 @@ recorder = EventLogger()
 _WRAP_FLAG = "_event_profiler_wrapped"
 
 
-def wrap_listener(app: Sphinx, event_name: str, listener):
+def wrap_listener(event_name, listener):
     """Wrap a single event listener's handler by adding a
     ``perf_counter()`` at the start and the end of the handler
     function call.
 
     Parameters
     ----------
-    app : sphinx.application.Sphinx
-        The running Sphinx application.
     event_name : str
         Name of the event this listener is registered for.
     listener : sphinx.events.EventListener
@@ -397,13 +395,13 @@ def wrap_all_listeners(app: Sphinx, *_args) -> None:
     """
     for event_name in list(app.events.listeners.keys()):
         app.events.listeners[event_name] = [
-            wrap_listener(app, event_name, listener)
+            wrap_listener(event_name, listener)
             for listener in app.events.listeners[event_name]
         ]
 
 
 def wrap_connect(app: Sphinx) -> None:
-    """Wraps the ``app.connect`` so listeners get wrapped when registered."""
+    """Wraps the ``app.events.connect`` so listeners get wrapped when registered."""
     original_connect = app.events.connect
 
     def wrapped(name, callback, *args, **kwargs):
@@ -411,7 +409,7 @@ def wrap_connect(app: Sphinx) -> None:
         listeners = app.events.listeners[name]
         for i, listener in enumerate(listeners):
             if listener.id == listener_id:
-                listeners[i] = wrap_listener(app, name, listener)
+                listeners[i] = wrap_listener(name, listener)
                 break
         return listener_id
 
