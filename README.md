@@ -1,124 +1,77 @@
 # [WIP] benchmark-sphinx-phase-wise
 
-To benchmark the sphinx docs build process event-wise. The benchmarks are computed from [sphinx's event callback API](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html).
+This is a Sphinx extension that benchmarks and profiles a docs build process [event](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html)-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds.
 
-## Demo output
+You can find the benchmarking outputs for different Scientific Python projects and learn more about the benchmarking output in the [benchmarking_outputs](./benchmarking_outputs/) directory.
 
-For Matplotlib docs build:
 
-```bash
-Event                                   Calls       Total(s)        Avg(ms)    %Build
--------------------------------------------------------------------------------------
-config-inited                               1     407.897459     407897.459    51.76%
-doctree-resolved                         2081     159.895919         76.836    20.29%
-source-read                              2081     118.485265         56.937    15.03%
-object-description-transform             7034      71.411225         10.152     9.06%
-doctree-read                             2081      19.743725          9.488     2.51%
-env-purge-doc                            2081       4.523341          2.174     0.57%
-write-started                               1       1.744397       1744.397     0.22%
-builder-inited                              1       1.361653       1361.653     0.17%
-include-read                               50       1.286405         25.728     0.16%
-warn-missing-reference                    141       1.183458          8.393     0.15%
-env-updated                                 1       0.538349        538.349     0.07%
-env-before-read-docs                        1       0.000224          0.224     0.00%
-env-check-consistency                       1       0.000117          0.117     0.00%
-build-finished                              1       0.000000          0.000     0.00%
-```
+## Usage
 
-For NumPy docs build:
+1. Add the extension to your `conf.py`:
 
-```bash
-Event                                   Calls       Total(s)        Avg(ms)    %Build
--------------------------------------------------------------------------------------
-doctree-resolved                         2673     151.714524         56.758    50.05%
-source-read                              2673     112.351479         42.032    37.06%
-object-description-transform             3480      16.495565          4.740     5.44%
-config-inited                               1       9.698906       9698.906     3.20%
-env-purge-doc                            2673       5.636594          2.109     1.86%
-doctree-read                             2673       4.485057          1.678     1.48%
-include-read                               25       1.214643         48.586     0.40%
-builder-inited                              1       0.841800        841.800     0.28%
-env-updated                                 1       0.504075        504.075     0.17%
-write-started                               1       0.210907        210.907     0.07%
-env-before-read-docs                        1       0.000199          0.199     0.00%
-env-check-consistency                       1       0.000153          0.153     0.00%
-build-finished                              1       0.000000          0.000     0.00%
-```
+   ```python
+   extensions = ["benchmark_sphinx_phase_wise", ...]
+   ```
 
-For NetworkX docs build:
+   Put it first in the list as it minimizes (but doesn't eliminate) the untracked starting time.
 
-```bash
-Event                                   Calls       Total(s)        Avg(ms)    %Build
--------------------------------------------------------------------------------------
-config-inited                               1      99.908844      99908.844    44.77%
-doctree-resolved                         1561      68.802479         44.076    30.83%
-source-read                              1561      36.947228         23.669    16.56%
-object-description-transform             1317       9.619805          7.304     4.31%
-doctree-read                             1561       3.242623          2.077     1.45%
-env-purge-doc                            1561       3.064107          1.963     1.37%
-builder-inited                              1       0.910023        910.023     0.41%
-env-updated                                 1       0.291570        291.570     0.13%
-write-started                               1       0.270730        270.730     0.12%
-include-read                                6       0.108453         18.075     0.05%
-warn-missing-reference                      1       0.002586          2.586     0.00%
-env-before-read-docs                        1       0.000420          0.420     0.00%
-env-check-consistency                       1       0.000278          0.278     0.00%
-build-finished                              1       0.000000          0.000     0.00%
-```
+2. Then build your docs as usual:
 
-For CPython docs build:
+   ```bash
+   sphinx-build -b html docs/ docs/_build/html
+   ```
 
-```bash
-ToDo
-```
+   The build generates a `sphinx_benchmarks.json` in the present working directory.
 
----
+3. Run the `print_summary.py` script to get the benchmarking output:
 
-## How to use it?
+   ```bash
+   python path/to/benchmark-sphinx-phase-wise/src/benchmark_sphinx_phase_wise/print_summary.py
+   ```
 
-In your sphinx's `conf.py` add the following:
+   For what the output actually mean, see [the benchmarking_outputs README](./benchmarking_outputs/README.md).
 
-```python
-extensions = [
-    "benchmark_sphinx_phase_wise",
-]
-```
 
----
+## How are benchmarks calculated?
 
-Just for reference: 
+Nearly everything an extension does in Sphinx goes through `app.events.emit()`.
+Sphinx calls it at certain points in the build process, and it runs all the
+registered handler for that event. This extension wraps and puts timers around this path.
 
-- benchmarks for phase-wise benchmarking for matplotlib:
+`wrap_emit()` wraps `app.events.emit` that times the whole emission, and
+`wrap_listener()` swaps each handler for a wrapped and timed copy of it.
+So for every event you get the total time it took and the split across its handlers.
+A stack is maintained to keep track of nested event, and the child event's time is
+later subtracted so it isn't counted twice. `wrap_all_listeners()` wraps everything
+already registered when the extension loads, and `wrap_connect()` wraps
+`app.events.connect` so handlers and events registered later, also get wrapped as they are called.
 
-```bash
-==================================================
-Sphinx phase-wise benchmarks
-==================================================
+Each timed call becomes a `HandlerCall` record and each event emission becomes an
+`Event` record, both kept in one `EventLogger`. All times are measured from the moment
+the extension started, so everything shares a starting point.
 
-Initialization :  452.402 s
-Reading        :  207.971 s
-Consistency    :    0.699 s
-Pre-writing    :    0.000 s
-Resolving      :  180.908 s
-Writing        :    7.531 s
+At `build-finished` (at priority 999, so other extensions' handlers gets executed first)
+the extension works out each event's own time, classify every handler with where it came from,
+and dumps everything into a JSON.
 
---------------------------------------------------
-Total          :  849.511 s
-```
 
-- benchmarks from the previous "time-stampped logging messages" approach for matplotlib:
+## Limitations of this extension - WIP
 
-```bash
-=== Main Phase Benchmarks ===
-
-Initialization        443.825 s
-Reading               233.482 s
-Consistency             0.051 s
-Resolving               3.702 s
-Writing               182.212 s
-```
-
----
+- No parallel builds: The recorder lives in the main process only, so
+`parallel_read_safe` and `parallel_write_safe` are both `False`. Sphinx will fall back to a
+serial build even if you pass `-j auto`, which means the wall-clock total won't match what
+you'd normally see, when you are building with parallelism.
+- The `build-finished` emission has `duration=None`. The handler that writes the JSON runs
+inside that emission, so the emission hasn't ended yet when it's serialised. It's stored
+with `duration=None` and the summary skips it. Anything after it, like `builder.cleanup()`
+isn't measured at all.
+- The startup blind spot: Timing begins at the extension's `setup()`. The "startup, before first emission" row in the gaps table covers only what happened after that point.
+- Some handlers can't be classified: Handlers defined in `conf.py`, or in a package that
+doesn't match anything in `app.extensions`, are classified as `unknown` and reported by
+module or file name. Partials and callable objects have no `__qualname__`, so they're
+labelled by whatever name could be recovered.
+- the extension itself also adds a little bit of overhead to the build process.
+- Wall clock time is not CPU time: caches, background processes, and network fetches all are included in the total time. Run benchmarks more than once before concluding anything.
 
 
 Thank you for stopping by :)
