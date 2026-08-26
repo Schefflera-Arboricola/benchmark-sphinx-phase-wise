@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=69"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/sphinx_benchmark"]
 
 [project]
-name = "benchmark-sphinx-phase-wise"
+name = "sphinx-benchmark"
 version = "0.1.0"
-description = "To benchmark the sphinx docs build process phase-wise"
+description = "This is a Sphinx extension that benchmarks and profiles a docs build process event-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds."
 license = {text = "BSD-3-Clause"}
 readme = "README.md"
 requires-python = ">=3.12"
@@ -21,5 +21,5 @@ name = "Aditi Juneja"
 email = "aditijuneja7@gmail.com"
 
 [project.urls]
-"Bug Tracker" = 'https://github.com/Schefflera-Arboricola/benchmark-sphinx-phase-wise/issues'
-"Source Code" = 'https://github.com/Schefflera-Arboricola/benchmark-sphinx-phase-wise'
+"Bug Tracker" = 'https://github.com/Schefflera-Arboricola/sphinx-benchmark/issues'
+"Source Code" = 'https://github.com/Schefflera-Arboricola/sphinx-benchmark'

@@ -5,8 +5,8 @@ import pytest
 from sphinx.application import Sphinx
 from sphinx.events import EventListener
 from sphinx.extension import Extension
-import benchmark_sphinx_phase_wise.extension as bs
-from benchmark_sphinx_phase_wise.extension import (
+import sphinx_benchmark.extension as bs
+from sphinx_benchmark.extension import (
     EventLogger,
     _WRAP_FLAG,
     recorder,
@@ -246,7 +246,7 @@ def test_starts_fresh_build(log):
 def test_real_build_benchmarks(tmp_path, monkeypatch):
     srcdir = tmp_path / "src"
     srcdir.mkdir()
-    (srcdir / "conf.py").write_text("extensions = ['benchmark_sphinx_phase_wise']\n")
+    (srcdir / "conf.py").write_text("extensions = ['sphinx_benchmark']\n")
     (srcdir / "index.rst").write_text("Title\n=====\n\nblah blah blah blah\n")
     outdir = tmp_path / "out"
 

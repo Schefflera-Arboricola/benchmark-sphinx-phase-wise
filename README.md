@@ -1,4 +1,4 @@
-# [WIP] benchmark-sphinx-phase-wise
+# [WIP] sphinx-benchmark
 
 This is a Sphinx extension that benchmarks and profiles a docs build process [event](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html)-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds.
 
@@ -10,7 +10,7 @@ You can find the benchmarking outputs for different Scientific Python projects a
 1. Add the extension to your `conf.py`:
 
    ```python
-   extensions = ["benchmark_sphinx_phase_wise", ...]
+   extensions = ["sphinx_benchmark", ...]
    ```
 
    Put it first in the list as it minimizes (but doesn't eliminate) the untracked starting time.
@@ -26,7 +26,7 @@ You can find the benchmarking outputs for different Scientific Python projects a
 3. Run the `print_summary.py` script to get the benchmarking output:
 
    ```bash
-   python path/to/benchmark-sphinx-phase-wise/src/benchmark_sphinx_phase_wise/print_summary.py
+   python path/to/sphinx-benchmark/src/sphinx_benchmark/print_summary.py
    ```
 
    For what the output actually mean, see [the benchmarking_outputs README](./benchmarking_outputs/README.md).
