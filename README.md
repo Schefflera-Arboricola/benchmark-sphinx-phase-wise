@@ -1,6 +1,6 @@
 # sphinx-benchmark
 
-This is a Sphinx extension that benchmarks and profiles a docs build process [event](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html)-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds. Note, that this extension is still in its early stages of developments--so it might change a lot and there might be a lot of bugs in it right now. So don't use it in production yet!
+This is a Sphinx extension that benchmarks and profiles a docs build process [event](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html)-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds. Note, that this extension is still in its early stages of development--so it might change a lot and there might be a lot of bugs in it right now. So don't use it in production yet!
 
 You can find the benchmarking outputs for different Scientific Python projects and learn more about the benchmarking output in the [benchmarking_outputs](./benchmarking_outputs/) directory.
 
