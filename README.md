@@ -2,9 +2,6 @@
 
 This is a Sphinx extension that benchmarks and profiles a docs build process [event](https://www.sphinx-doc.org/en/master/extdev/event_callbacks.html)-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds. Note, that this extension is still in its early stages of development--so it might change a lot and there might be a lot of bugs in it right now. So don't use it in production yet!
 
-You can find the benchmarking outputs for different Scientific Python projects and learn more about the benchmarking output in the [benchmarking_outputs](./benchmarking_outputs/) directory.
-
-
 ## Usage
 
 1. Install the sphinx-benchmark extension
@@ -29,14 +26,25 @@ You can find the benchmarking outputs for different Scientific Python projects a
 
    The build generates a `sphinx_benchmarks.json` in the present working directory.
 
-4. Run the `print_summary.py` script to get the benchmarking output:
+4. Change the directory to the build directory (where the generated `sphinx_benchmarks.json` is present) and run:
 
    ```bash
-   python path/to/sphinx-benchmark/src/sphinx_benchmark/print_summary.py
+   sphinx-benchmark run table
    ```
 
-   For what the output actually mean, see [the benchmarking_outputs README](./benchmarking_outputs/README.md).
+   You can find the benchmarking outputs for different Scientific Python projects in the 
+   [benchmarking_outputs](./benchmarking_outputs/) directory. For what the output actually mean,
+   see [the benchmarking_outputs README](./benchmarking_outputs/README.md).
 
+5. If you want to see the benchmarks summary in html format, run:
+
+   ```bash
+   sphinx-benchmark run html
+   ```
+
+   Then a `sphinx_benchmark_report` folder will be created in your build directory. Open the `index.html` present inside
+   `sphinx_benchmark_report` in your browser to see the overview and events, handlers and gaps breakdown.
+   You can also specify the output directory for where you want the `sphinx_benchmark_report` folder to get created, using `--output-dir` option. Or specify a different json file using the `--input` option.
 
 ## How are benchmarks calculated?
 

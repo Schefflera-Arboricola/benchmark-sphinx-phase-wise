@@ -5,6 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/sphinx_benchmark"]
 
+[project.scripts]
+sphinx-benchmark = "sphinx_benchmark.cli:main"
+
 [project]
 name = "sphinx-benchmark"
 version = "0.1.0"
