@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections import Counter
 from dataclasses import dataclass, asdict
 from time import perf_counter
@@ -464,7 +465,10 @@ def build_finished(app: Sphinx, exception) -> None:
         recorder.compute_own_times()
         recorder.classify_all_handlers(app)
         recorder.write_json()
-        print("sphinx_benchmarks.json written")
+        print(
+            "sphinx_benchmarks.json written to "
+            f"{os.path.abspath('sphinx_benchmarks.json')}"
+        )
     except Exception as e:
         logger.warning("Benchmarking extension failed: %s", e, exc_info=True)
 
