@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -12,7 +12,8 @@ sphinx-benchmark = "sphinx_benchmark.cli:main"
 name = "sphinx-benchmark"
 version = "0.1.0"
 description = "This is a Sphinx extension that benchmarks and profiles a docs build process event-wise(handler-wise), and the gaps in between the events-- so you can tell which extension, theme, or part of Sphinx itself is slowing your builds."
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
