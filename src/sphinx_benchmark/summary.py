@@ -83,6 +83,90 @@ class GapRow:
 
 
 @dataclass(frozen=True)
+class OverviewRow:
+    """One line of the overview: an event's own time or a gap.
+
+    Parameters
+    ----------
+    label : str
+        Event name, or a gap description such as ``"a -> b"``.
+    kind : str
+        ``"event"`` or ``"gap"``.
+    seconds : float
+        Own time of the event, or total gap time, in seconds.
+    count : int or None
+        Emissions of the event / occurrences of the gap; ``None`` for
+        the startup and finish pseudo-gaps.
+    """
+
+    label: str
+    kind: str
+    seconds: float
+    count: int | None
+
+
+@dataclass(frozen=True)
+class EmissionDetail:
+    """One recorded emission of a single event, verbatim from the JSON.
+
+    ``parent_name`` resolves ``parent_id`` to the parent emission's
+    event name (``None`` for top-level emissions). ``duration`` and
+    ``own_time`` are ``None`` for an emission still in progress when the
+    JSON was written (e.g. ``build-finished``).
+    """
+
+    event_id: int
+    call: int
+    start: float
+    depth: int
+    duration: float | None
+    own_time: float | None
+    parent_name: str | None
+
+
+@dataclass(frozen=True)
+class CallDetail:
+    """One recorded call of a single handler, verbatim from the JSON."""
+
+    event: str
+    handler: str
+    module: str
+    kind: str
+    extension: str
+    call: int
+    start: float
+    duration: float
+
+
+@dataclass(frozen=True)
+class GapOccurrence:
+    """One individual gap between two consecutive top-level emissions.
+
+    Parameters
+    ----------
+    source, target : str
+        Event names on either side of the gap.
+    source_call, target_call : int
+        The ``call`` numbers of the two emissions involved.
+    start : float
+        Seconds since build start at which the gap began (source end).
+    end : float
+        Seconds since build start at which the gap ended (target start).
+    """
+
+    source: str
+    target: str
+    source_call: int
+    target_call: int
+    start: float
+    end: float
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
+
+@dataclass(frozen=True)
 class BuildSummary:
     """Everything the table and HTML outputs need, in one place.
 
@@ -232,3 +316,124 @@ def compute_summary(data: dict) -> BuildSummary:
         finish=finish,
         overlaps=overlaps,
     )
+
+
+# --------------------------------------------------------------- details --
+
+
+def event_names(data: dict) -> set[str]:
+    """Return every event name that appears in the recorded emissions."""
+    return {e["event_name"] for e in data.get("events", [])}
+
+
+def handler_names(data: dict) -> set[str]:
+    """Return every handler name that appears in the recorded calls."""
+    return {c["handler"] for c in data.get("calls", [])}
+
+
+def overview_rows(s: BuildSummary) -> tuple[OverviewRow, ...]:
+    """Events (own time) and gaps interleaved, sorted by time descending."""
+    rows = [OverviewRow(ev.name, "event", ev.own_time, ev.emissions) for ev in s.events]
+    if s.startup > 0:
+        rows.append(
+            OverviewRow("(startup, before first emission)", "gap", s.startup, None)
+        )
+    if s.finish > 0:
+        rows.append(OverviewRow("(finish, after last emission)", "gap", s.finish, None))
+    rows += [OverviewRow(g.label, "gap", g.total, g.count) for g in s.gaps]
+    rows.sort(key=lambda r: r.seconds, reverse=True)
+    return tuple(rows)
+
+
+def all_emission_details(data: dict) -> dict[str, tuple[EmissionDetail, ...]]:
+    """Every recorded emission, grouped by event name, in emission order."""
+    events = data.get("events", [])
+    id_to_name = {e["event_id"]: e["event_name"] for e in events}
+    grouped: dict[str, list[EmissionDetail]] = defaultdict(list)
+    for e in events:
+        grouped[e["event_name"]].append(
+            EmissionDetail(
+                event_id=e["event_id"],
+                call=e["call"],
+                start=e["start"],
+                depth=e["depth"],
+                duration=e["duration"],
+                own_time=e["own_time"],
+                parent_name=id_to_name.get(e["parent_id"]),
+            )
+        )
+    return {name: tuple(rows) for name, rows in grouped.items()}
+
+
+def emission_details(data: dict, event_name: str) -> tuple[EmissionDetail, ...]:
+    """Every recorded emission of ``event_name``, in emission order."""
+    return all_emission_details(data).get(event_name, ())
+
+
+def all_handler_call_details(data: dict) -> dict[str, tuple[CallDetail, ...]]:
+    """Every recorded call, grouped by handler name, in chronological order."""
+    grouped: dict[str, list[CallDetail]] = defaultdict(list)
+    for c in data.get("calls", []):
+        grouped[c["handler"]].append(
+            CallDetail(
+                event=c["event"],
+                handler=c["handler"],
+                module=c["module"],
+                kind=c["kind"],
+                extension=c["extension"] or "-",
+                call=c["call"],
+                start=c["start"],
+                duration=c["duration"],
+            )
+        )
+    for rows in grouped.values():
+        rows.sort(key=lambda r: r.start)
+    return {name: tuple(rows) for name, rows in grouped.items()}
+
+
+def handler_call_details(
+    data: dict, handler_name: str, event_name: str | None = None
+) -> tuple[CallDetail, ...]:
+    """Every recorded call of ``handler_name``, in chronological order.
+
+    If ``event_name`` is given, only calls made during that event's
+    emissions are returned.
+    """
+    rows = all_handler_call_details(data).get(handler_name, ())
+    if event_name is not None:
+        rows = tuple(r for r in rows if r.event == event_name)
+    return rows
+
+
+def all_gap_occurrence_details(
+    data: dict,
+) -> dict[tuple[str, str], tuple[GapOccurrence, ...]]:
+    """Every individual gap, grouped by (source, target) event pair, in
+    chronological order.
+
+    Negative gaps (overlapping emissions, which flag a recording bug)
+    are skipped, matching :func:`compute_summary`.
+    """
+    top = sorted(
+        (e["start"], e["duration"], e["event_name"], e["call"])
+        for e in data.get("events", [])
+        if e["depth"] == 0 and e["duration"] is not None
+    )
+    grouped: dict[tuple[str, str], list[GapOccurrence]] = defaultdict(list)
+    for (p_start, p_dur, p_name, p_call), (start, _, name, call) in zip(top, top[1:]):
+        gap_start = p_start + p_dur
+        if start < gap_start:
+            continue
+        grouped[(p_name, name)].append(
+            GapOccurrence(p_name, name, p_call, call, gap_start, start)
+        )
+    return {pair: tuple(rows) for pair, rows in grouped.items()}
+
+
+def gap_occurrence_details(
+    data: dict, source: str, target: str
+) -> tuple[GapOccurrence, ...]:
+    """Every individual gap between consecutive top-level emissions of
+    ``source`` and ``target``, in chronological order.
+    """
+    return all_gap_occurrence_details(data).get((source, target), ())

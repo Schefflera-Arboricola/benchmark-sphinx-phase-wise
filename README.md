@@ -29,7 +29,49 @@ This is a Sphinx extension that benchmarks and profiles a docs build process [ev
 4. Change the directory to the build directory (where the generated `sphinx_benchmarks.json` is present) and run:
 
    ```bash
-   sphinx-benchmark run table
+   sphinx-benchmark run
+   ```
+
+   This prints the top 10 events and gaps that take up the most of the build time,
+   sorted by % of build descending. Following is the output for the matplotlib's docs build:
+   
+   ```bash
+   % sphinx-benchmark run         
+
+   Build time: 317.779871s   Inside events: 73.067759s (22.99%)   Outside events (gaps): 244.712111s (77.01%)
+   ===========================================================================================================
+   Top 10 of 75 events and gaps, by % of build
+   ===========================================================================================================
+   Name                                                              Type        Time(s)     Count   % build
+   -----------------------------------------------------------------------------------------------------------
+   html-page-context -> doctree-resolved                              gap      94.032040      1745    29.59%
+   doctree-resolved -> html-page-context                              gap      32.449961      2081    10.21%
+   source-read -> doctree-read                                        gap      21.442795       981     6.75%
+   html-page-context -> missing-reference                             gap      20.821428       335     6.55%
+   autodoc-process-docstring                                        event      18.713229      8350     5.89%
+   doctree-read                                                     event      16.040303      2081     5.05%
+   autodoc-process-signature                                        event      14.553734      8258     4.58%
+   autodoc-process-docstring -> object-description-transform          gap      13.749841      1123     4.33%
+   object-description-transform -> object-description-transform       gap      12.837677      5853     4.04%
+   object-description-transform -> doctree-read                       gap       9.291097      1065     2.92%
+   -----------------------------------------------------------------------------------------------------------
+   events total                                                                73.067759              22.99%
+   gaps total                                                                 244.712111              77.01%
+   (65 more rows; use --top N to show more)
+   ```
+
+   Use `--top` to change how many rows are shown, e.g. `sphinx-benchmark run --top 20`.
+
+   For the full tables (the per-event handler tables plus the gaps summary), run
+   `sphinx-benchmark run table`; it also accepts a selector for more focused views:
+
+   ```bash
+   sphinx-benchmark run table events                      # only the per-event handler tables
+   sphinx-benchmark run table events <event-name>         # every emission of that event, with all details
+   sphinx-benchmark run table events <handler-name>       # every call of that handler from any event
+   sphinx-benchmark run table events <event-name> <handler-name>    # that handler's calls during that event emission only
+   sphinx-benchmark run table gaps                        # only the gaps summary table
+   sphinx-benchmark run table gaps <start-event> <end-event>  # details of every individual gap between those two events
    ```
 
    You can find the benchmarking outputs for different Scientific Python projects in the 

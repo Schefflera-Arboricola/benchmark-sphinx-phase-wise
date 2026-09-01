@@ -115,9 +115,138 @@ def test_run_table_and_html(tmp_path, capsys):
 
     report = tmp_path / "report"
     assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
-    for name in ("index.html", "events.html", "gaps.html", "style.css"):
+    for name in ("index.html", "events.html", "gaps.html", "style.css", "report.js"):
         assert (report / name).exists()
     assert "conic-gradient" in (report / "index.html").read_text()
+
+
+def test_run_default_overview(tmp_path, capsys):
+    json_path = tmp_path / "sphinx_benchmarks.json"
+    json_path.write_text(json.dumps(SAMPLE))
+
+    # bare 'run' prints the overview (top 10 by default) without 'gap: ' prefixes
+    assert main(["run", "-i", str(json_path)]) == 0
+    out = capsys.readouterr().out
+    assert "Overview" in out
+    assert "builder-inited -> doctree-read" in out
+    assert "gap: " not in out
+    assert "Inside events: 6.000000s (60.00%)" in out
+    assert "Outside events (gaps): 4.000000s (40.00%)" in out
+    # footer shows full-build totals: events 4.2+1.5+0.3, gaps 3.3+0.5+0.2
+    assert "events total" in out and "gaps total" in out
+    # sorted descending: builder-inited (4.2s) before doctree-read (1.5s)
+    assert out.index("builder-inited") < out.index("doctree-read")
+
+    # --top limits the rows: top 2 are builder-inited (4.2s) and finish (3.3s)
+    assert main(["run", "--top", "2", "-i", str(json_path)]) == 0
+    out = capsys.readouterr().out
+    assert "Top 2 of" in out
+    assert "builder-inited" in out and "doctree-read" not in out
+    assert "use --top N to show more" in out
+
+    # --top only makes sense for the bare overview
+    with pytest.raises(SystemExit):
+        main(["run", "table", "--top", "2", "-i", str(json_path)])
+    assert "--top is only valid" in capsys.readouterr().err
+
+
+def test_table_selectors(tmp_path, capsys):
+    json_path = tmp_path / "sphinx_benchmarks.json"
+    json_path.write_text(json.dumps(SAMPLE))
+
+    def run(*selector):
+        assert main(["run", "table", *selector, "-i", str(json_path)]) == 0
+        return capsys.readouterr().out
+
+    out = run("gaps")
+    assert "Gaps Summary" in out and "builder-inited" in out
+
+    out = run("events")
+    assert "builder-inited" in out and "Gaps Summary" not in out
+
+    # event detail: all emissions
+    out = run("events", "builder-inited")
+    assert "Emissions of 'builder-inited'" in out and "(top-level)" in out
+
+    # handler detail across events
+    out = run("events", "process_docs")
+    assert "Calls of 'process_docs'" in out
+    assert "doctree-read" in out  # the event column
+    assert out.count("doctree-read") >= 2  # both calls listed
+
+    # handler detail scoped to one event
+    out = run("events", "builder-inited", "gen_gallery")
+    assert "Calls of 'gen_gallery' during 'builder-inited'" in out
+
+    # gap occurrences between two events
+    out = run("gaps", "builder-inited", "doctree-read")
+    assert "Gaps between 'builder-inited' -> 'doctree-read'" in out
+    assert "0.200000" in out
+
+
+def test_table_unknown_name_suggests(tmp_path, capsys):
+    json_path = tmp_path / "sphinx_benchmarks.json"
+    json_path.write_text(json.dumps(SAMPLE))
+    with pytest.raises(SystemExit):
+        main(["run", "table", "events", "gen_galery", "-i", str(json_path)])
+    err = capsys.readouterr().err
+    assert "unknown event or handler" in err and "gen_gallery" in err
+
+
+def test_html_detail_pages(tmp_path):
+    json_path = tmp_path / "sphinx_benchmarks.json"
+    json_path.write_text(json.dumps(SAMPLE))
+    report = tmp_path / "report"
+    assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
+
+    events_html = (report / "events.html").read_text()
+    assert 'href="event-builder-inited.html"' in events_html
+    assert 'href="handler-gen_gallery.html?event=builder-inited"' in events_html
+
+    gaps_html = (report / "gaps.html").read_text()
+    assert 'href="gap-builder-inited----doctree-read.html"' in gaps_html
+
+    handler_page = (report / "handler-process_docs.html").read_text()
+    assert 'id="event-filter"' in handler_page  # per-event dropdown
+    assert "All events" in handler_page
+    assert 'class="sortable"' in handler_page
+
+    event_page = (report / "event-builder-inited.html").read_text()
+    assert "1 recorded emissions" in event_page
+
+    gap_page = (report / "gap-builder-inited----doctree-read.html").read_text()
+    assert "1 occurrences" in gap_page and "0.200000" in gap_page
+
+
+def test_html_long_handler_name(tmp_path):
+    # e.g. a functools.partial repr used as a handler: its name can exceed
+    # the filesystem's 255-byte filename limit unless the slug is truncated
+    data = json.loads(json.dumps(SAMPLE))
+    long_name = "functools.partial(<function setup at 0x10d4b7060>, " + " ".join(
+        f"arg{i}=<class 'pkg.mod{i}.Thing{i}'>" for i in range(40)
+    )
+    data["calls"].append(
+        {
+            "event": "builder-inited",
+            "handler": long_name,
+            "module": "conf",
+            "kind": "unknown",
+            "extension": "conf",
+            "call": 1,
+            "start": 0.6,
+            "duration": 0.1,
+        }
+    )
+    json_path = tmp_path / "sphinx_benchmarks.json"
+    json_path.write_text(json.dumps(data))
+    report = tmp_path / "report"
+    assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
+    handler_pages = [p.name for p in report.glob("handler-*.html")]
+    assert len(handler_pages) == 3
+    assert all(len(name) < 120 for name in handler_pages)
+    # the events page links to the truncated filename
+    long_page = next(p for p in handler_pages if "functools" in p)
+    assert f'href="{long_page}' in (report / "events.html").read_text()
 
 
 def test_missing_file_exits_with_message(tmp_path):
