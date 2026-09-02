@@ -54,9 +54,9 @@ COLUMN_HELP = {
     "Duration(s)": "How long this took, in seconds.",
     "Own(s)": "Duration excluding nested event emissions, in seconds.",
     "Parent event": "The emission this one was nested inside, or (top-level).",
-    "#": "Chronological number of this gap occurrence.",
-    "Source call#": "Call number of the source event's emission before the gap.",
-    "Target call#": "Call number of the target event's emission after the gap.",
+    "#": "The gap number between the two event emissions. (1st gap, 2nd gap, ...)",
+    "First event emission#": "The emission number of the first event before the gap (e.g. 5 = the first event was emitted for the 5th time and after which this gap entered).",
+    "Second event emission#": "The emission number of the second event before which the gap ends (e.g. 6 means after this gap ends the second event was emitted the 6th time during the build process)",
     "Gap start(s)": "Seconds since build start at which the source emission ended.",
     "Gap end(s)": "Seconds since build start at which the target emission began.",
 }
@@ -472,8 +472,8 @@ def _gap_page_body(
         _th(n)
         for n in (
             "#",
-            "Source call#",
-            "Target call#",
+            "First event emission#",
+            "Second event emission#",
             "Gap start(s)",
             "Gap end(s)",
             "Duration(s)",
@@ -490,6 +490,7 @@ def _gap_page_body(
     return f"""
 <p class="backlink"><a href="gaps.html">← all gaps</a></p>
 <h1>Gap: {links.event_a(source)} → {links.event_a(target)}</h1>
+<p class="meta">During the build there were multiple times when the {source} and {target} events had a time gap between their consecutive emissions. In the table below, each row is one such gap.</p>
 <p class="meta">{len(rows)} occurrences · {total:.6f}s total
  ({s.pct(total):.2f}% of build). Click a column heading to sort.</p>
 <table class="sortable">

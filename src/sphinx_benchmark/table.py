@@ -247,7 +247,7 @@ def print_gap_occurrences(
 ) -> None:
     """Print every individual gap between two events' top-level emissions."""
     header = (
-        f"  {'#':>4}{'Source call#':>14}{'Target call#':>14}{'Gap start(s)':>15}"
+        f"  {'#':>4}{'First event emission#':>24}{'Second event emission#':>24}{'Gap start(s)':>15}"
         f"{'Gap end(s)':>15}{'Duration(s)':>15}{'% build':>10}"
     )
     width = len(header)
@@ -260,8 +260,8 @@ def print_gap_occurrences(
     print("-" * width)
     for i, r in enumerate(rows, 1):
         print(
-            f"  {i:4d}{r.source_call:14d}{r.target_call:14d}{r.start:15.6f}"
+            f"  {i:4d}{r.source_call:24d}{r.target_call:24d}{r.start:15.6f}"
             f"{r.end:15.6f}{r.duration:15.6f}{s.pct(r.duration):9.2f}%"
         )
     print("-" * width)
-    print(f"  {'(total)':32}{'':15}{'':15}{total:15.6f}{s.pct(total):9.2f}%")
+    print(f"  {'(total)':32}{'':25}{'':25}{total:15.6f}{s.pct(total):9.2f}%")
