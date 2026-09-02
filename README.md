@@ -10,6 +10,12 @@ This is a Sphinx extension that benchmarks and profiles a docs build process [ev
    pip install sphinx-benchmark
    ```
 
+   Or to install the latest version
+
+   ```bash
+   pip install git+https://github.com/Schefflera-Arboricola/sphinx-benchmark.git@main
+   ```
+
 2. Add the extension to your `conf.py`:
 
    ```python
@@ -38,25 +44,25 @@ This is a Sphinx extension that benchmarks and profiles a docs build process [ev
    ```bash
    % sphinx-benchmark run         
 
-   Build time: 317.779871s   Inside events: 73.067759s (22.99%)   Outside events (gaps): 244.712111s (77.01%)
+   Build time: 855.269954s   Inside events: 493.623291s (57.72%)   Outside events (gaps): 361.646663s (42.28%)
    ===========================================================================================================
    Top 10 of 75 events and gaps, by % of build
    ===========================================================================================================
    Name                                                              Type        Time(s)     Count   % build
    -----------------------------------------------------------------------------------------------------------
-   html-page-context -> doctree-resolved                              gap      94.032040      1745    29.59%
-   doctree-resolved -> html-page-context                              gap      32.449961      2081    10.21%
-   source-read -> doctree-read                                        gap      21.442795       981     6.75%
-   html-page-context -> missing-reference                             gap      20.821428       335     6.55%
-   autodoc-process-docstring                                        event      18.713229      8350     5.89%
-   doctree-read                                                     event      16.040303      2081     5.05%
-   autodoc-process-signature                                        event      14.553734      8258     4.58%
-   autodoc-process-docstring -> object-description-transform          gap      13.749841      1123     4.33%
-   object-description-transform -> object-description-transform       gap      12.837677      5853     4.04%
-   object-description-transform -> doctree-read                       gap       9.291097      1065     2.92%
+   builder-inited                                                   event     421.705558         1    49.31%
+   html-page-context -> doctree-resolved                              gap     115.324759      1745    13.48%
+   source-read -> doctree-read                                        gap      65.246262       981     7.63%
+   object-description-transform -> doctree-read                       gap      48.713614      1065     5.70%
+   doctree-resolved -> html-page-context                              gap      33.772388      2081     3.95%
+   object-description-transform -> object-description-transform       gap      21.183541      5853     2.48%
+   autodoc-process-docstring                                        event      21.149022      8350     2.47%
+   html-page-context -> missing-reference                             gap      19.954656       335     2.33%
+   doctree-read                                                     event      16.198356      2081     1.89%
+   autodoc-process-signature                                        event      15.622995      8258     1.83%
    -----------------------------------------------------------------------------------------------------------
-   events total                                                                73.067759              22.99%
-   gaps total                                                                 244.712111              77.01%
+   events total                                                               474.675931              55.50%
+   gaps total                                                                 304.195220              35.57%
    (65 more rows; use --top N to show more)
    ```
 
