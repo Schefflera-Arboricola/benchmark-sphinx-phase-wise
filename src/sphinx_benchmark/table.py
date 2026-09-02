@@ -153,10 +153,9 @@ def print_overview(s: BuildSummary, top: int | None = None) -> None:
             f"{count:>10}{s.pct(r.seconds):9.2f}%"
         )
     print("-" * width)
-    # totals cover the whole build (all rows), matching the header above,
-    # even when --top truncates the table
-    events_total = sum(r.seconds for r in all_rows if r.kind == "event")
-    gaps_total = sum(r.seconds for r in all_rows if r.kind == "gap")
+    # totals cover the only top N rows in the table
+    events_total = sum(r.seconds for r in rows if r.kind == "event")
+    gaps_total = sum(r.seconds for r in rows if r.kind == "gap")
     print(
         f"  {'events total':{label_w}}{'':>8}{events_total:15.6f}"
         f"{'':>10}{s.pct(events_total):9.2f}%"
