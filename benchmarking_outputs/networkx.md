@@ -1,368 +1,368 @@
 ```bash
-Build time:  259.2628104579999
+Build time:  234.8523188340041
 ========================================================================================================================================================
-builder-inited  —  107.478046s own time (41.46% of build)  |  1 emissions  |  107.494970s duration (including nested event)  |  depth 0
+builder-inited  —  113.080701s own time (48.15% of build)  |  1 emissions  |  113.095184s duration (including nested event)  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  generate_gallery_rst                              extension           sphinx_gallery.gen_gallery                       1     103.752136     103752.136
-  load_mappings                                     sphinx-internal     -                                                1       1.781266       1781.266
-  process_generate_options                          sphinx-internal     -                                                1       1.292976       1292.976
-  update_config                                     theme               pydata_sphinx_theme                              1       0.666546        666.546
-  create_mystnb_config                              extension           myst_nb                                          1       0.000852          0.852
-  create_myst_config                                unknown             myst_parser                                      1       0.000467          0.467
-  add_shorten_xform                                 theme               pydata_sphinx_theme                              1       0.000216          0.216
-  update_gallery_conf_builder_inited                extension           sphinx_gallery.gen_gallery                       1       0.000142          0.142
-  setup_translators                                 theme               pydata_sphinx_theme                              1       0.000083          0.083
-  init_filename_registry                            extension           matplotlib.sphinxext.plot_directive              1       0.000011          0.011
-  validate_math_renderer                            sphinx-internal     -                                                1       0.000010          0.010
-  _init_stuff                                       sphinx-internal     -                                                1       0.000006          0.006
+  generate_gallery_rst                              extension           sphinx_gallery.gen_gallery                       1     109.463326     109463.326
+  load_mappings                                     sphinx-internal     -                                                1       1.852218       1852.218
+  process_generate_options                          sphinx-internal     -                                                1       1.121455       1121.455
+  update_config                                     theme               pydata_sphinx_theme                              1       0.656724        656.724
+  create_mystnb_config                              extension           myst_nb                                          1       0.000579          0.579
+  create_myst_config                                unknown             myst_parser                                      1       0.000386          0.386
+  add_shorten_xform                                 theme               pydata_sphinx_theme                              1       0.000194          0.194
+  setup_translators                                 theme               pydata_sphinx_theme                              1       0.000070          0.070
+  update_gallery_conf_builder_inited                extension           sphinx_gallery.gen_gallery                       1       0.000033          0.033
+  init_filename_registry                            extension           matplotlib.sphinxext.plot_directive              1       0.000008          0.008
   override_mathjax                                  unknown             myst_parser                                      1       0.000005          0.005
-  validate_config_values                            sphinx-internal     -                                                1       0.000002          0.002
+  validate_math_renderer                            sphinx-internal     -                                                1       0.000004          0.004
+  _init_stuff                                       sphinx-internal     -                                                1       0.000003          0.003
+  validate_config_values                            sphinx-internal     -                                                1       0.000001          0.001
   install_packages_for_ja                           sphinx-internal     -                                                1       0.000001          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                            107.494718
-  (unaccounted overhead)                                                                                                         0.000252
+  (sum of handlers)                                                                                                            113.095007
+  (unaccounted overhead)                                                                                                         0.000177
 
 ========================================================================================================================================================
-autodoc-process-docstring  —  9.503218s own time (3.67% of build)  |  2843 emissions  |  depth 0
+autodoc-process-docstring  —  7.293857s own time (3.11% of build)  |  2843 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  mangle_docstrings                                 extension           numpydoc                                      2843       8.820003          3.102
-  touch_empty_backreferences                        extension           sphinx_gallery.gen_gallery                    2843       0.372080          0.131
-  mathdollar_docstrings                             extension           texext                                        2843       0.085846          0.030
-  write_api_entries                                 extension           sphinx_gallery.gen_gallery                    2843       0.004104          0.001
+  mangle_docstrings                                 extension           numpydoc                                      2843       6.819527          2.399
+  touch_empty_backreferences                        extension           sphinx_gallery.gen_gallery                    2843       0.244308          0.086
+  mathdollar_docstrings                             extension           texext                                        2843       0.071352          0.025
+  write_api_entries                                 extension           sphinx_gallery.gen_gallery                    2843       0.002603          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              9.282032
-  (unaccounted overhead)                                                                                                         0.221186
+  (sum of handlers)                                                                                                              7.137790
+  (unaccounted overhead)                                                                                                         0.156067
 
 ========================================================================================================================================================
-autodoc-process-signature  —  6.236585s own time (2.41% of build)  |  2843 emissions  |  depth 0
+autodoc-process-signature  —  5.092290s own time (2.17% of build)  |  2843 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  mangle_signature                                  extension           numpydoc                                      2843       6.126279          2.155
+  mangle_signature                                  extension           numpydoc                                      2843       5.009789          1.762
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              6.126279
-  (unaccounted overhead)                                                                                                         0.110307
+  (sum of handlers)                                                                                                              5.009789
+  (unaccounted overhead)                                                                                                         0.082501
 
 ========================================================================================================================================================
-html-page-context  —  4.387312s own time (1.69% of build)  |  1824 emissions  |  depth 0
+html-page-context  —  3.405413s own time (1.45% of build)  |  1824 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  update_and_remove_templates                       theme               pydata_sphinx_theme                           1824       1.995638          1.094
-  set_secondary_sidebar_items                       theme               pydata_sphinx_theme                           1824       1.608905          0.882
-  add_toctree_functions                             theme               pydata_sphinx_theme                           1824       0.085774          0.047
-  setup_resource_paths                              sphinx-internal     -                                             1824       0.021536          0.012
-  add_per_page_html_resources                       extension           myst_nb                                       1824       0.016449          0.009
-  install_mathjax                                   sphinx-internal     -                                             1824       0.012448          0.007
-  setup_template_link_getters                       extension           sphinx_gallery.gen_gallery                    1824       0.007548          0.004
-  setup_logo_path                                   theme               pydata_sphinx_theme                           1824       0.006740          0.004
-  setup_edit_url                                    theme               pydata_sphinx_theme                           1824       0.005261          0.003
-  update_context                                    theme               alabaster                                     1824       0.003462          0.002
-  _fix_canonical_url                                theme               pydata_sphinx_theme                           1824       0.002685          0.001
+  update_and_remove_templates                       theme               pydata_sphinx_theme                           1824       1.516483          0.831
+  set_secondary_sidebar_items                       theme               pydata_sphinx_theme                           1824       1.270115          0.696
+  add_toctree_functions                             theme               pydata_sphinx_theme                           1824       0.067963          0.037
+  setup_resource_paths                              sphinx-internal     -                                             1824       0.016772          0.009
+  install_mathjax                                   sphinx-internal     -                                             1824       0.009943          0.005
+  add_per_page_html_resources                       extension           myst_nb                                       1824       0.009232          0.005
+  setup_logo_path                                   theme               pydata_sphinx_theme                           1824       0.005608          0.003
+  setup_template_link_getters                       extension           sphinx_gallery.gen_gallery                    1824       0.005541          0.003
+  setup_edit_url                                    theme               pydata_sphinx_theme                           1824       0.003591          0.002
+  update_context                                    theme               alabaster                                     1824       0.002397          0.001
+  _fix_canonical_url                                theme               pydata_sphinx_theme                           1824       0.001870          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              3.766446
-  (unaccounted overhead)                                                                                                         0.620866
+  (sum of handlers)                                                                                                              2.909515
+  (unaccounted overhead)                                                                                                         0.495898
 
 ========================================================================================================================================================
-doctree-read  —  1.762005s own time (0.68% of build)  |  1561 emissions  |  1.836072s duration (including nested event)  |  depth 0
+doctree-read  —  1.343537s own time (0.57% of build)  |  1561 emissions  |  1.398351s duration (including nested event)  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  DependenciesCollector.process_doc                 sphinx-internal     -                                             1561       0.444187          0.285
-  TocTreeCollector.process_doc                      sphinx-internal     -                                             1561       0.356654          0.228
-  doctree_read                                      sphinx-internal     -                                             1561       0.257387          0.165
-  ImageCollector.process_doc                        sphinx-internal     -                                             1561       0.212370          0.136
-  DownloadFileCollector.process_doc                 sphinx-internal     -                                             1561       0.184742          0.118
-  relabel_references                                extension           numpydoc                                      1561       0.144990          0.093
-  TitleCollector.process_doc                        sphinx-internal     -                                             1561       0.069166          0.044
-  MetadataCollector.process_doc                     sphinx-internal     -                                             1561       0.008216          0.005
-  mark_plot_labels                                  extension           matplotlib.sphinxext.plot_directive           1561       0.003099          0.002
-  _FilenameCollector.process_doc                    extension           matplotlib.sphinxext.plot_directive           1561       0.001535          0.001
-  NbMetadataCollector.process_doc                   extension           myst_nb                                       1561       0.001258          0.001
+  DependenciesCollector.process_doc                 sphinx-internal     -                                             1561       0.314195          0.201
+  TocTreeCollector.process_doc                      sphinx-internal     -                                             1561       0.294181          0.188
+  doctree_read                                      sphinx-internal     -                                             1561       0.200176          0.128
+  ImageCollector.process_doc                        sphinx-internal     -                                             1561       0.172411          0.110
+  DownloadFileCollector.process_doc                 sphinx-internal     -                                             1561       0.137590          0.088
+  relabel_references                                extension           numpydoc                                      1561       0.113515          0.073
+  TitleCollector.process_doc                        sphinx-internal     -                                             1561       0.054542          0.035
+  MetadataCollector.process_doc                     sphinx-internal     -                                             1561       0.007146          0.005
+  mark_plot_labels                                  extension           matplotlib.sphinxext.plot_directive           1561       0.002620          0.002
+  _FilenameCollector.process_doc                    extension           matplotlib.sphinxext.plot_directive           1561       0.001059          0.001
+  NbMetadataCollector.process_doc                   extension           myst_nb                                       1561       0.001005          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              1.683604
-  (unaccounted overhead)                                                                                                         0.152468
+  (sum of handlers)                                                                                                              1.298439
+  (unaccounted overhead)                                                                                                         0.099912
 
 ========================================================================================================================================================
-env-purge-doc  —  0.727199s own time (0.28% of build)  |  1561 emissions  |  depth 0
+env-purge-doc  —  0.545551s own time (0.23% of build)  |  1561 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  env_purge_doc                                     sphinx-internal     -                                             1561       0.270635          0.173
-  TocTreeCollector.clear_doc                        sphinx-internal     -                                             1561       0.186194          0.119
-  DownloadFileCollector.clear_doc                   sphinx-internal     -                                             1561       0.110748          0.071
-  ImageCollector.clear_doc                          sphinx-internal     -                                             1561       0.046164          0.030
-  DependenciesCollector.clear_doc                   sphinx-internal     -                                             1561       0.003128          0.002
-  NbMetadataCollector.clear_doc                     extension           myst_nb                                       1561       0.002664          0.002
-  _FilenameCollector.clear_doc                      extension           matplotlib.sphinxext.plot_directive           1561       0.002170          0.001
-  TitleCollector.clear_doc                          sphinx-internal     -                                             1561       0.002074          0.001
-  MetadataCollector.clear_doc                       sphinx-internal     -                                             1561       0.001684          0.001
+  env_purge_doc                                     sphinx-internal     -                                             1561       0.209370          0.134
+  TocTreeCollector.clear_doc                        sphinx-internal     -                                             1561       0.146057          0.094
+  DownloadFileCollector.clear_doc                   sphinx-internal     -                                             1561       0.079557          0.051
+  ImageCollector.clear_doc                          sphinx-internal     -                                             1561       0.030802          0.020
+  DependenciesCollector.clear_doc                   sphinx-internal     -                                             1561       0.002138          0.001
+  TitleCollector.clear_doc                          sphinx-internal     -                                             1561       0.001795          0.001
+  NbMetadataCollector.clear_doc                     extension           myst_nb                                       1561       0.001710          0.001
+  _FilenameCollector.clear_doc                      extension           matplotlib.sphinxext.plot_directive           1561       0.001636          0.001
+  MetadataCollector.clear_doc                       sphinx-internal     -                                             1561       0.001257          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.625460
-  (unaccounted overhead)                                                                                                         0.101738
+  (sum of handlers)                                                                                                              0.474322
+  (unaccounted overhead)                                                                                                         0.071229
 
 ========================================================================================================================================================
-doctree-resolved  —  0.359173s own time (0.14% of build)  |  1561 emissions  |  depth 0
+doctree-resolved  —  0.284825s own time (0.12% of build)  |  1561 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  clean_backrefs                                    extension           numpydoc                                      1561       0.275267          0.176
+  clean_backrefs                                    extension           numpydoc                                      1561       0.226524          0.145
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.275267
-  (unaccounted overhead)                                                                                                         0.083906
+  (sum of handlers)                                                                                                              0.226524
+  (unaccounted overhead)                                                                                                         0.058301
 
 ========================================================================================================================================================
-missing-reference  —  0.322048s own time (0.12% of build)  |  4857 emissions  |  depth 0
+missing-reference  —  0.240103s own time (0.10% of build)  |  4857 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  missing_reference                                 sphinx-internal     -                                             4857       0.110849          0.023
-  builtin_resolver                                  sphinx-internal     -                                             4857       0.015339          0.003
+  missing_reference                                 sphinx-internal     -                                             4857       0.087900          0.018
+  builtin_resolver                                  sphinx-internal     -                                             4857       0.012116          0.002
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.126188
-  (unaccounted overhead)                                                                                                         0.195860
+  (sum of handlers)                                                                                                              0.100016
+  (unaccounted overhead)                                                                                                         0.140087
 
 ========================================================================================================================================================
-source-read  —  0.180312s own time (0.07% of build)  |  1561 emissions  |  depth 0
+source-read  —  0.154124s own time (0.07% of build)  |  1561 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  install_dispatcher                                sphinx-internal     -                                             1561       0.006308          0.004
-  write_api_entry_usage                             extension           sphinx_gallery.gen_gallery                    1561       0.002055          0.001
+  install_dispatcher                                sphinx-internal     -                                             1561       0.004400          0.003
+  write_api_entry_usage                             extension           sphinx_gallery.gen_gallery                    1561       0.001644          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.008363
-  (unaccounted overhead)                                                                                                         0.171949
+  (sum of handlers)                                                                                                              0.006044
+  (unaccounted overhead)                                                                                                         0.148080
 
 ========================================================================================================================================================
-object-description-transform  —  0.112481s own time (0.04% of build)  |  1317 emissions  |  depth 0
+object-description-transform  —  0.081072s own time (0.03% of build)  |  1317 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  filter_meta_fields                                sphinx-internal     -                                             1317       0.018300          0.014
-  _merge_typehints                                  sphinx-internal     -                                             1317       0.002052          0.002
+  filter_meta_fields                                sphinx-internal     -                                             1317       0.015197          0.012
+  _merge_typehints                                  sphinx-internal     -                                             1317       0.001443          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.020351
-  (unaccounted overhead)                                                                                                         0.092130
+  (sum of handlers)                                                                                                              0.016641
+  (unaccounted overhead)                                                                                                         0.064431
 
 ========================================================================================================================================================
-autodoc-before-process-signature  —  0.089392s own time (0.03% of build)  |  2443 emissions  |  depth 0
-========================================================================================================================================================
-  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
---------------------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.089392
-
-========================================================================================================================================================
-viewcode-follow-imported  —  0.045863s own time (0.02% of build)  |  1317 emissions  |  depth 1
+autodoc-before-process-signature  —  0.060640s own time (0.03% of build)  |  2443 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.045863
+  (unaccounted overhead)                                                                                                         0.060640
 
 ========================================================================================================================================================
-viewcode-find-source  —  0.037360s own time (0.01% of build)  |  1573 emissions  |  depth 0-1
+viewcode-follow-imported  —  0.032716s own time (0.01% of build)  |  1317 emissions  |  depth 1
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.037360
+  (unaccounted overhead)                                                                                                         0.032716
 
 ========================================================================================================================================================
-autodoc-skip-member  —  0.016924s own time (0.01% of build)  |  1019 emissions  |  depth 1
+viewcode-find-source  —  0.027540s own time (0.01% of build)  |  1573 emissions  |  depth 0-1
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.016924
+  (unaccounted overhead)                                                                                                         0.027540
 
 ========================================================================================================================================================
-config-inited  —  0.002562s own time (0.00% of build)  |  1 emissions  |  depth 0
+autodoc-skip-member  —  0.014483s own time (0.01% of build)  |  1019 emissions  |  depth 1
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  fill_gallery_conf_defaults                        extension           sphinx_gallery.gen_gallery                       1       0.000687          0.687
-  check_confval_types                               sphinx-internal     -                                                1       0.000397          0.397
-  validate_html_static_path                         sphinx-internal     -                                                1       0.000317          0.317
-  convert_source_suffix                             sphinx-internal     -                                                1       0.000243          0.243
-  _register_directives                              sphinx-internal     -                                                1       0.000114          0.114
-  init_numfig_format                                sphinx-internal     -                                                1       0.000059          0.059
-  correct_copyright_year                            sphinx-internal     -                                                1       0.000039          0.039
-  update_config                                     extension           numpydoc                                         1       0.000021          0.021
-  validate_html_logo                                sphinx-internal     -                                                1       0.000021          0.021
-  validate_html_favicon                             sphinx-internal     -                                                1       0.000017          0.017
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  (sum of handlers)                                                                                                              0.000000
+  (unaccounted overhead)                                                                                                         0.014483
+
+========================================================================================================================================================
+config-inited  —  0.002400s own time (0.00% of build)  |  1 emissions  |  depth 0
+========================================================================================================================================================
+  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  fill_gallery_conf_defaults                        extension           sphinx_gallery.gen_gallery                       1       0.000661          0.661
+  validate_html_static_path                         sphinx-internal     -                                                1       0.000567          0.567
+  check_confval_types                               sphinx-internal     -                                                1       0.000302          0.302
+  _register_directives                              sphinx-internal     -                                                1       0.000101          0.101
+  convert_source_suffix                             sphinx-internal     -                                                1       0.000048          0.048
+  validate_html_logo                                sphinx-internal     -                                                1       0.000029          0.029
+  validate_html_favicon                             sphinx-internal     -                                                1       0.000024          0.024
+  update_config                                     extension           numpydoc                                         1       0.000019          0.019
   validate_intersphinx_mapping                      sphinx-internal     -                                                1       0.000016          0.016
-  evaluate_copyright_placeholders                   sphinx-internal     -                                                1       0.000012          0.012
+  evaluate_copyright_placeholders                   sphinx-internal     -                                                1       0.000011          0.011
+  correct_copyright_year                            sphinx-internal     -                                                1       0.000005          0.005
+  init_numfig_format                                sphinx-internal     -                                                1       0.000005          0.005
   error_on_html_sidebars_string_values              sphinx-internal     -                                                1       0.000003          0.003
   merge_source_suffix                               sphinx-internal     -                                                1       0.000003          0.003
-  check_primary_domain                              sphinx-internal     -                                                1       0.000002          0.002
   convert_epub_css_files                            sphinx-internal     -                                                1       0.000002          0.002
+  check_primary_domain                              sphinx-internal     -                                                1       0.000002          0.002
+  verify_needs_extensions                           sphinx-internal     -                                                1       0.000002          0.002
+  compile_linkcheck_allowed_redirects               sphinx-internal     -                                                1       0.000002          0.002
   pre_configure_jupyterlite_sphinx                  extension           sphinx_gallery.gen_gallery                       1       0.000002          0.002
-  validate_config_values                            sphinx-internal     -                                                1       0.000002          0.002
+  validate_config_values                            sphinx-internal     -                                                1       0.000001          0.001
   validate_html_extra_path                          sphinx-internal     -                                                1       0.000001          0.001
-  verify_needs_extensions                           sphinx-internal     -                                                1       0.000001          0.001
-  add_exclude_patterns                              extension           myst_nb                                          1       0.000001          0.001
+  validate_latex_theme_options                      sphinx-internal     -                                                1       0.000001          0.001
   post_configure_jupyterlite_sphinx                 extension           sphinx_gallery.gen_gallery                       1       0.000001          0.001
+  add_exclude_patterns                              extension           myst_nb                                          1       0.000001          0.001
   deprecate_source_encoding                         sphinx-internal     -                                                1       0.000001          0.001
   convert_html_css_files                            sphinx-internal     -                                                1       0.000001          0.001
-  validate_latex_theme_options                      sphinx-internal     -                                                1       0.000001          0.001
+  error_on_html_4                                   sphinx-internal     -                                                1       0.000001          0.001
   add_nb_custom_formats                             extension           myst_nb                                          1       0.000001          0.001
   convert_html_js_files                             sphinx-internal     -                                                1       0.000001          0.001
   convert_highlight_options                         sphinx-internal     -                                                1       0.000001          0.001
-  compile_linkcheck_allowed_redirects               sphinx-internal     -                                                1       0.000001          0.001
-  error_on_html_4                                   sphinx-internal     -                                                1       0.000000          0.000
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.001968
-  (unaccounted overhead)                                                                                                         0.000593
+  (sum of handlers)                                                                                                              0.001814
+  (unaccounted overhead)                                                                                                         0.000585
 
 ========================================================================================================================================================
-autodoc-process-bases  —  0.001760s own time (0.00% of build)  |  71 emissions  |  depth 0
+autodoc-process-bases  —  0.001942s own time (0.00% of build)  |  71 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.001760
+  (unaccounted overhead)                                                                                                         0.001942
 
 ========================================================================================================================================================
-env-get-outdated  —  0.000625s own time (0.00% of build)  |  1 emissions  |  depth 0
+env-get-outdated  —  0.000612s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   EnvironmentCollector.get_outdated_docs            sphinx-internal     -                                                7       0.000004          0.001
-  check_master_doc                                  sphinx-internal     -                                                1       0.000003          0.003
+  check_master_doc                                  sphinx-internal     -                                                1       0.000002          0.002
   NbMetadataCollector.get_outdated_docs             extension           myst_nb                                          1       0.000001          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000007
-  (unaccounted overhead)                                                                                                         0.000617
+  (unaccounted overhead)                                                                                                         0.000605
 
 ========================================================================================================================================================
-env-before-read-docs  —  0.000494s own time (0.00% of build)  |  1 emissions  |  depth 0
+env-before-read-docs  —  0.000493s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.000494
+  (unaccounted overhead)                                                                                                         0.000493
 
 ========================================================================================================================================================
-warn-missing-reference  —  0.000123s own time (0.00% of build)  |  1 emissions  |  depth 0
+env-get-updated  —  0.000075s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  warn_missing_reference                            sphinx-internal     -                                                1       0.000057          0.057
---------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.000057
-  (unaccounted overhead)                                                                                                         0.000067
-
-========================================================================================================================================================
-env-get-updated  —  0.000083s own time (0.00% of build)  |  1 emissions  |  depth 0
-========================================================================================================================================================
-  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
---------------------------------------------------------------------------------------------------------------------------------------------------------
-  TocTreeCollector.get_updated_docs                 sphinx-internal     -                                                1       0.000023          0.023
-  EnvironmentCollector.get_updated_docs             sphinx-internal     -                                                7       0.000011          0.002
+  TocTreeCollector.get_updated_docs                 sphinx-internal     -                                                1       0.000026          0.026
+  EnvironmentCollector.get_updated_docs             sphinx-internal     -                                                7       0.000008          0.001
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000033
-  (unaccounted overhead)                                                                                                         0.000050
+  (unaccounted overhead)                                                                                                         0.000041
 
 ========================================================================================================================================================
-env-updated  —  0.000073s own time (0.00% of build)  |  1 emissions  |  depth 0
+warn-missing-reference  —  0.000071s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  update_exec_tables                                extension           myst_nb                                          1       0.000018          0.018
+  warn_missing_reference                            sphinx-internal     -                                                1       0.000045          0.045
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.000018
-  (unaccounted overhead)                                                                                                         0.000054
+  (sum of handlers)                                                                                                              0.000045
+  (unaccounted overhead)                                                                                                         0.000026
 
 ========================================================================================================================================================
-env-check-consistency  —  0.000058s own time (0.00% of build)  |  1 emissions  |  depth 0
+env-updated  —  0.000065s own time (0.00% of build)  |  1 emissions  |  depth 0
+========================================================================================================================================================
+  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  update_exec_tables                                extension           myst_nb                                          1       0.000017          0.017
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  (sum of handlers)                                                                                                              0.000017
+  (unaccounted overhead)                                                                                                         0.000047
+
+========================================================================================================================================================
+html-collect-pages  —  0.000036s own time (0.00% of build)  |  1 emissions  |  depth 0
+========================================================================================================================================================
+  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  collect_pages                                     sphinx-internal     -                                                1       0.000005          0.005
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  (sum of handlers)                                                                                                              0.000005
+  (unaccounted overhead)                                                                                                         0.000030
+
+========================================================================================================================================================
+env-check-consistency  —  0.000033s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.000058
+  (unaccounted overhead)                                                                                                         0.000033
 
 ========================================================================================================================================================
-html-collect-pages  —  0.000039s own time (0.00% of build)  |  1 emissions  |  depth 0
-========================================================================================================================================================
-  Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
---------------------------------------------------------------------------------------------------------------------------------------------------------
-  collect_pages                                     sphinx-internal     -                                                1       0.000008          0.008
---------------------------------------------------------------------------------------------------------------------------------------------------------
-  (sum of handlers)                                                                                                              0.000008
-  (unaccounted overhead)                                                                                                         0.000032
-
-========================================================================================================================================================
-write-started  —  0.000039s own time (0.00% of build)  |  1 emissions  |  depth 0
+write-started  —  0.000020s own time (0.00% of build)  |  1 emissions  |  depth 0
 ========================================================================================================================================================
   Handler                                           Kind                Ext/Module                                   Calls       Total(s)        Avg(ms)
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
   (sum of handlers)                                                                                                              0.000000
-  (unaccounted overhead)                                                                                                         0.000039
+  (unaccounted overhead)                                                                                                         0.000020
 
 ========================================================================================================================================================
-Sum of own durations of all events: 131.263775s   Wall clock: 259.262810s   Outside any event: 127.999036s (49.37%)
+Sum of own durations of all events: 131.662599s   Wall clock: 234.852319s   Outside any event: 103.189720s (43.94%)
 
 ========================================================================================================================================================
 Gaps Summary
 ========================================================================================================================================================
-  Between                                                                                                       Total(s)     Count     Avg(ms)   % build
+  Between                                                                                                   Gap Total(s)     Count     Avg(ms)   % build
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (startup, before first emission)                                                                              1.437970                           0.55%
-  html-page-context -> missing-reference                                                                       30.198548       910      33.185    11.65%
-  html-page-context -> doctree-resolved                                                                        23.912564       650      36.789     9.22%
-  doctree-resolved -> html-page-context                                                                        19.407881      1561      12.433     7.49%
-  autodoc-process-docstring -> object-description-transform                                                     9.065269      1311       6.915     3.50%
-  object-description-transform -> doctree-read                                                                  6.806086      1274       5.342     2.63%
-  source-read -> doctree-read                                                                                   6.757329       186      36.330     2.61%
-  source-read -> autodoc-before-process-signature                                                               6.017033      1158       5.196     2.32%
-  viewcode-find-source -> html-page-context                                                                     5.371372       258      20.819     2.07%
-  env-purge-doc -> source-read                                                                                  3.657889      1561       2.343     1.41%
-  autodoc-process-docstring -> autodoc-before-process-signature                                                 2.788272      1196       2.331     1.08%
-  autodoc-process-signature -> autodoc-process-docstring                                                        2.528646      2843       0.889     0.98%
-  doctree-read -> env-purge-doc                                                                                 2.525350      1560       1.619     0.97%
-  missing-reference -> doctree-resolved                                                                         1.638790       910       1.801     0.63%
-  html-page-context -> viewcode-find-source                                                                     1.133634       257       4.411     0.44%
-  autodoc-process-docstring -> doctree-read                                                                     0.894343       101       8.855     0.34%
-  autodoc-process-docstring -> autodoc-process-signature                                                        0.543195       208       2.612     0.21%
-  env-get-updated -> env-check-consistency                                                                      0.409103         1     409.103     0.16%
-  write-started -> doctree-resolved                                                                             0.349010         1     349.010     0.13%
-  doctree-read -> env-updated                                                                                   0.336052         1     336.052     0.13%
-  source-read -> autodoc-process-signature                                                                      0.267137       188       1.421     0.10%
-  autodoc-before-process-signature -> autodoc-process-signature                                                 0.252280      2443       0.103     0.10%
-  missing-reference -> missing-reference                                                                        0.209104      3946       0.053     0.08%
-  builder-inited -> env-get-outdated                                                                            0.146577         1     146.577     0.06%
-  config-inited -> builder-inited                                                                               0.101185         1     101.185     0.04%
-  html-page-context -> html-page-context                                                                        0.075007         5      15.001     0.03%
-  object-description-transform -> autodoc-before-process-signature                                              0.052262        19       2.751     0.02%
-  autodoc-process-bases -> autodoc-before-process-signature                                                     0.048792        70       0.697     0.02%
-  autodoc-process-docstring -> autodoc-process-bases                                                            0.048142        27       1.783     0.02%
-  source-read -> autodoc-process-bases                                                                          0.034749        29       1.198     0.01%
-  html-page-context -> html-collect-pages                                                                       0.015390         1      15.390     0.01%
-  object-description-transform -> autodoc-process-bases                                                         0.007662        15       0.511     0.00%
-  object-description-transform -> autodoc-process-signature                                                     0.007446         4       1.861     0.00%
-  object-description-transform -> object-description-transform                                                  0.004407         5       0.881     0.00%
-  autodoc-process-bases -> object-description-transform                                                         0.001244         1       1.244     0.00%
-  env-get-outdated -> env-before-read-docs                                                                      0.000701         1       0.701     0.00%
-  env-updated -> env-get-updated                                                                                0.000408         1       0.408     0.00%
-  env-check-consistency -> write-started                                                                        0.000332         1       0.332     0.00%
-  env-before-read-docs -> env-purge-doc                                                                         0.000230         1       0.230     0.00%
-  html-collect-pages -> viewcode-find-source                                                                    0.000224         1       0.224     0.00%
-  warn-missing-reference -> missing-reference                                                                   0.000159         1       0.159     0.00%
-  missing-reference -> warn-missing-reference                                                                   0.000011         1       0.011     0.00%
-  (finish, after last emission)                                                                                 0.947250                           0.37%
+  (startup, before first emission)                                                                              1.503060                           0.64%
+  html-page-context -> missing-reference                                                                       24.491063       910      26.913    10.43%
+  html-page-context -> doctree-resolved                                                                        18.599124       650      28.614     7.92%
+  doctree-resolved -> html-page-context                                                                        15.218764      1561       9.749     6.48%
+  autodoc-process-docstring -> object-description-transform                                                     6.439400      1311       4.912     2.74%
+  object-description-transform -> doctree-read                                                                  6.029354      1274       4.733     2.57%
+  source-read -> doctree-read                                                                                   5.958540       186      32.035     2.54%
+  source-read -> autodoc-before-process-signature                                                               4.885260      1158       4.219     2.08%
+  viewcode-find-source -> html-page-context                                                                     4.399506       258      17.052     1.87%
+  autodoc-process-docstring -> autodoc-before-process-signature                                                 2.628735      1196       2.198     1.12%
+  env-purge-doc -> source-read                                                                                  2.513340      1561       1.610     1.07%
+  autodoc-process-signature -> autodoc-process-docstring                                                        2.202627      2843       0.775     0.94%
+  doctree-read -> env-purge-doc                                                                                 1.880058      1560       1.205     0.80%
+  missing-reference -> doctree-resolved                                                                         1.338659       910       1.471     0.57%
+  html-page-context -> viewcode-find-source                                                                     0.857582       257       3.337     0.37%
+  autodoc-process-docstring -> doctree-read                                                                     0.757987       101       7.505     0.32%
+  source-read -> autodoc-process-signature                                                                      0.558962       188       2.973     0.24%
+  autodoc-process-docstring -> autodoc-process-signature                                                        0.460924       208       2.216     0.20%
+  doctree-read -> env-updated                                                                                   0.260217         1     260.217     0.11%
+  write-started -> doctree-resolved                                                                             0.240774         1     240.774     0.10%
+  env-get-updated -> env-check-consistency                                                                      0.239987         1     239.987     0.10%
+  autodoc-before-process-signature -> autodoc-process-signature                                                 0.197854      2443       0.081     0.08%
+  missing-reference -> missing-reference                                                                        0.166086      3946       0.042     0.07%
+  builder-inited -> env-get-outdated                                                                            0.159136         1     159.136     0.07%
+  config-inited -> builder-inited                                                                               0.118215         1     118.215     0.05%
+  html-page-context -> html-page-context                                                                        0.065493         5      13.099     0.03%
+  object-description-transform -> autodoc-before-process-signature                                              0.052197        19       2.747     0.02%
+  autodoc-process-bases -> autodoc-before-process-signature                                                     0.041505        70       0.593     0.02%
+  autodoc-process-docstring -> autodoc-process-bases                                                            0.032817        27       1.215     0.01%
+  source-read -> autodoc-process-bases                                                                          0.031731        29       1.094     0.01%
+  html-page-context -> html-collect-pages                                                                       0.014388         1      14.388     0.01%
+  object-description-transform -> autodoc-process-signature                                                     0.007154         4       1.788     0.00%
+  object-description-transform -> autodoc-process-bases                                                         0.006477        15       0.432     0.00%
+  object-description-transform -> object-description-transform                                                  0.004092         5       0.818     0.00%
+  autodoc-process-bases -> object-description-transform                                                         0.001501         1       1.501     0.00%
+  env-get-outdated -> env-before-read-docs                                                                      0.000702         1       0.702     0.00%
+  env-updated -> env-get-updated                                                                                0.000387         1       0.387     0.00%
+  html-collect-pages -> viewcode-find-source                                                                    0.000258         1       0.258     0.00%
+  env-before-read-docs -> env-purge-doc                                                                         0.000227         1       0.227     0.00%
+  env-check-consistency -> write-started                                                                        0.000207         1       0.207     0.00%
+  warn-missing-reference -> missing-reference                                                                   0.000121         1       0.121     0.00%
+  missing-reference -> warn-missing-reference                                                                   0.000005         1       0.005     0.00%
+  (finish, after last emission)                                                                                 0.825246                           0.35%
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-  (total outside events)                                                                                      127.999036                          49.37%
+  (total outside events)                                                                                      103.189720                          43.94%
 ```
