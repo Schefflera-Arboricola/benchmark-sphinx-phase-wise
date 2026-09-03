@@ -198,7 +198,13 @@ def test_classify_all_handlers(app, log, monkeypatch):
 
     expected = {
         "sphinx.builders.html": ("sphinx-internal", None),
+        "sphinx.ext.intersphinx": ("extension", "sphinx.ext.intersphinx"),
+        "sphinx.ext.autodoc.typehints": ("extension", "sphinx.ext.autodoc"),
         "sphinx_gallery.gen_gallery": ("extension", "sphinx_gallery.gen_gallery"),
+        "sphinx_gallery.interactive_example": (
+            "extension",
+            "sphinx_gallery.gen_gallery",
+        ),
         "pydata_sphinx_theme.toctree": ("theme", "pydata_sphinx_theme"),
         "conf.py": ("unknown", "conf"),
     }
