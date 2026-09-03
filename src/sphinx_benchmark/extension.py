@@ -240,7 +240,10 @@ class EventLogger:
             module = hc.module
             top = module.split(".")[0]
             if module not in all_hc:
-                if module == "sphinx" or module.startswith("sphinx."):
+                if module.startswith("sphinx.ext."): 
+                    # note, ``sphinx.ext.autodoc.typehints`` is reduced to ``sphinx.ext.autodoc``
+                    all_hc[module] = ("extension", ".".join(module.split(".")[:3]))
+                elif module == "sphinx" or module.startswith("sphinx."):
                     all_hc[module] = ("sphinx-internal", None)
                 # Checked before extensions: most themes also register a setup(), so they
                 # appear in app.extensions and would otherwise be classified as extensions.
