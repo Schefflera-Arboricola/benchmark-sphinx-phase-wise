@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections import Counter
 from dataclasses import dataclass, asdict
 from time import perf_counter
@@ -239,7 +240,10 @@ class EventLogger:
             module = hc.module
             top = module.split(".")[0]
             if module not in all_hc:
-                if module == "sphinx" or module.startswith("sphinx."):
+                if module.startswith("sphinx.ext."): 
+                    # note, ``sphinx.ext.autodoc.typehints`` is reduced to ``sphinx.ext.autodoc``
+                    all_hc[module] = ("extension", ".".join(module.split(".")[:3]))
+                elif module == "sphinx" or module.startswith("sphinx."):
                     all_hc[module] = ("sphinx-internal", None)
                 # Checked before extensions: most themes also register a setup(), so they
                 # appear in app.extensions and would otherwise be classified as extensions.
@@ -464,7 +468,10 @@ def build_finished(app: Sphinx, exception) -> None:
         recorder.compute_own_times()
         recorder.classify_all_handlers(app)
         recorder.write_json()
-        print("sphinx_benchmarks.json written")
+        print(
+            "sphinx_benchmarks.json written to "
+            f"{os.path.abspath('sphinx_benchmarks.json')}"
+        )
     except Exception as e:
         logger.warning("Benchmarking extension failed: %s", e, exc_info=True)
 
