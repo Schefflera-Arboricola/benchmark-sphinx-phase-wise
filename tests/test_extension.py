@@ -220,14 +220,20 @@ def test_write_json(log, tmp_path):
     log.record("source-read", "handler", "some_ext", 0.5, 0.25)
     log.enter_event("source-read")
     log.exit_event()
-    log.total_wall_time = 12.5
     out = tmp_path / "bench.json"
+    project_info = {"name": "proj", "version": "1.0", "copyright": "me", "HEAD": None}
+    build_info = {
+        "builder": "html",
+        "start_time": "2026-01-01 00:00:00 UTC",
+        "total_wall_time": 12.5,
+    }
 
-    log.write_json(str(out))
+    log.write_json(project_info, build_info, str(out))
     data = json.loads(out.read_text())
 
-    assert set(data) == {"total_wall_time", "calls", "events"}
-    assert data["total_wall_time"] == 12.5
+    assert set(data) == {"project_info", "build_info", "calls", "events"}
+    assert data["project_info"] == project_info
+    assert data["build_info"] == build_info
     assert data["calls"][0]["handler"] == "handler"
     assert data["calls"][0]["duration"] == 0.25
     assert data["events"][0]["event_name"] == "source-read"
@@ -252,7 +258,9 @@ def test_starts_fresh_build(log):
 def test_real_build_benchmarks(tmp_path, monkeypatch):
     srcdir = tmp_path / "src"
     srcdir.mkdir()
-    (srcdir / "conf.py").write_text("extensions = ['sphinx_benchmark']\n")
+    (srcdir / "conf.py").write_text(
+        "project = 'proj'\nextensions = ['sphinx_benchmark']\n"
+    )
     (srcdir / "index.rst").write_text("Title\n=====\n\nblah blah blah blah\n")
     outdir = tmp_path / "out"
 
@@ -270,7 +278,11 @@ def test_real_build_benchmarks(tmp_path, monkeypatch):
 
     data = json.loads((tmp_path / "sphinx_benchmarks.json").read_text())
 
-    assert data["total_wall_time"] > 0
+    assert data["build_info"]["total_wall_time"] > 0
+    assert data["build_info"]["builder"] == "html"
+    assert data["build_info"]["start_time"]
+    assert data["project_info"]["name"] == "proj"
+    assert "HEAD" in data["project_info"]
     assert data["calls"] and data["events"]
     assert {"builder-inited", "build-finished"} <= {
         e["event_name"] for e in data["events"]

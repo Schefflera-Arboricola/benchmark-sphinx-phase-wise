@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+from datetime import datetime, timezone
 from collections import Counter
 from dataclasses import dataclass, asdict
 from time import perf_counter
@@ -119,6 +121,10 @@ class EventLogger:
         The :func:`time.perf_counter` value captured when :meth:`start`
         was called, used as the zero point for relative timings.
         ``None`` before :meth:`start` has been called.
+    start_ts : datetime or None
+        The :class:`datetime` timestamp captured when :meth:`start`
+        was called, later stored in json. ``None`` before :meth:`start`
+        has been called.
     call_counts : collections.Counter
         Number of calls per ``(event, handler)`` pair; used to
         assign the ``call`` attribute of each :class:`HandlerCall`.
@@ -136,6 +142,7 @@ class EventLogger:
         self.calls: list[HandlerCall] = []
         self.events: list[Event] = []
         self.start_time: float | None = None
+        self.start_ts: datetime | None = None
         self.call_counts: Counter = Counter()
         self.event_call_counts: Counter = Counter()
         self.total_wall_time: float = 0.0
@@ -151,6 +158,7 @@ class EventLogger:
         self.call_counts = Counter()
         self.event_call_counts = Counter()
         self.start_time = perf_counter()
+        self.start_ts = datetime.now(timezone.utc)
         self._stack = []
         self._next_event_id = 0
 
@@ -240,7 +248,7 @@ class EventLogger:
             module = hc.module
             top = module.split(".")[0]
             if module not in all_hc:
-                if module.startswith("sphinx.ext."): 
+                if module.startswith("sphinx.ext."):
                     # note, ``sphinx.ext.autodoc.typehints`` is reduced to ``sphinx.ext.autodoc``
                     all_hc[module] = ("extension", ".".join(module.split(".")[:3]))
                 elif module == "sphinx" or module.startswith("sphinx."):
@@ -258,13 +266,17 @@ class EventLogger:
                             break
             hc.kind, hc.extension = all_hc[module]
 
-    def write_json(self, filename: str = "sphinx_benchmarks.json") -> None:
+    def write_json(
+        self, project_info, build_info, filename: str = "sphinx_benchmarks.json"
+    ) -> None:
         """Write all recorded handler calls to a JSON file.
 
-        The json has a three top-level keys:
+        The json has a four top-level keys:
 
-        ``"total_wall_time"`` is the total wall-clock time of the build,
-        as measured by ``perf_counter() - start_time``.
+        ``"project_info"`` is a dict containing project name, version, copyright,
+        and git HEAD commit hash (if found).
+
+        ``"build_info"`` is a dict containing builder name, start time, and total wall time.
 
         ``"calls"`` is a list of the recorded :class:`HandlerCall` entries (as
         plain dicts, via :func:`dataclasses.asdict`), one per handler
@@ -272,17 +284,12 @@ class EventLogger:
 
         ``"events"`` is a list of the recorded :class:`Event` entries (as
         plain dicts, via :func:`dataclasses.asdict`), one per event emission.
-
-        Parameters
-        ----------
-        filename : str, optional
-            Path to dump the benchmarking records.
-            Defaults to ``"sphinx_benchmarks.json"``.
         """
         with open(filename, "w") as f:
             json.dump(
                 {
-                    "total_wall_time": self.total_wall_time,
+                    "project_info": project_info,
+                    "build_info": build_info,
                     "calls": [asdict(c) for c in self.calls],
                     "events": [asdict(e) for e in self.events],
                 },
@@ -467,7 +474,32 @@ def build_finished(app: Sphinx, exception) -> None:
         )
         recorder.compute_own_times()
         recorder.classify_all_handlers(app)
-        recorder.write_json()
+
+        cfg = app.config
+        project_info = {
+            "name": cfg.project,
+            "version": cfg.version,
+            "copyright": cfg.copyright,
+        }
+        build_info = {
+            "builder": app.builder.name,
+            "start_time": recorder.start_ts.strftime("%Y-%m-%d %H:%M:%S %Z"),
+            "total_wall_time": recorder.total_wall_time,
+        }
+        try:
+            out = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=app.confdir,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            project_info["HEAD"] = out.stdout.strip()
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            # CalledProcessError : it's not a git repo; FileNotFoundError : git is not installed
+            print("no git HEAD found:", e)
+            project_info["HEAD"] = None
+        recorder.write_json(project_info=project_info, build_info=build_info)
         print(
             "sphinx_benchmarks.json written to "
             f"{os.path.abspath('sphinx_benchmarks.json')}"

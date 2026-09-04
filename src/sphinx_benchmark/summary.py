@@ -8,7 +8,7 @@ outputs can never disagree about the numbers.
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 
 
@@ -172,9 +172,6 @@ class BuildSummary:
 
     Parameters
     ----------
-    total_build_time : float
-        Wall-clock build time in seconds (``total_wall_time`` from the
-        JSON, falling back to the sum of event own-times, or 1.0).
     time_in_events : float
         Sum of all events' own times, in seconds.
     events : tuple of EventRow
@@ -188,15 +185,28 @@ class BuildSummary:
     overlaps : int
         Number of negative gaps found. Top-level emissions can't
         overlap, so any value > 0 flags a bug in the recording.
+    project_info : dict
+        The ``project_info`` dict from the JSON (name, version,
+        copyright, HEAD); empty if missing.
+    build_info : dict
+        The ``build_info`` dict from the JSON (builder, start_time,
+        total_wall_time); empty if missing.
     """
 
-    total_build_time: float
     time_in_events: float
     events: tuple[EventRow, ...]
     gaps: tuple[GapRow, ...]
     startup: float
     finish: float
     overlaps: int
+    project_info: dict = field(default_factory=dict)
+    build_info: dict = field(default_factory=dict)
+
+    @property
+    def total_build_time(self) -> float:
+        """Wall-clock build time in seconds: ``build_info.total_wall_time``,
+        falling back to the sum of event own-times, or 1.0."""
+        return self.build_info.get("total_wall_time") or self.time_in_events or 1.0
 
     @property
     def gaps_total(self) -> float:
@@ -246,7 +256,9 @@ def compute_summary(data: dict) -> BuildSummary:
                 has_nested.add(e["event_name"])
 
     time_in_events = sum(own_totals.values())
-    total_build_time = data.get("total_wall_time") or time_in_events or 1.0
+    project_info = data.get("project_info") or {}
+    build_info = data.get("build_info") or {}
+    total_build_time = build_info.get("total_wall_time") or time_in_events or 1.0
 
     by_event: dict[str, list[HandlerRow]] = defaultdict(list)
     for (event, handler), total in handler_totals.items():
@@ -308,13 +320,14 @@ def compute_summary(data: dict) -> BuildSummary:
     finish = total_build_time - (top[-1][0] + top[-1][1]) if top else 0.0
 
     return BuildSummary(
-        total_build_time=total_build_time,
         time_in_events=time_in_events,
         events=tuple(event_rows),
         gaps=gap_rows,
         startup=startup,
         finish=finish,
         overlaps=overlaps,
+        project_info=project_info,
+        build_info=build_info,
     )
 
 

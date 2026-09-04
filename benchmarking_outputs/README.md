@@ -5,9 +5,10 @@ This directory contains the benchmarking results for some of the Scientific Pyth
 At fixed points in a docs build process (e.g. after config is read, after a page is parsed, before a page is written, etc.) Sphinx emits an **event**, and every extension or theme that registered a **handler** for
 that event gets called. This tool times each of those events and the handler calls within those events.
 
-Every build with this extension enabled creates a `sphinx_benchmarks.json` file with following three things:
+Every build with this extension enabled creates a `sphinx_benchmarks.json` file with following four things:
 
-- `total_wall_time` : the whole build time, start to finish
+- `project_info` : the project's name, version and copyright from `conf.py`, plus the git `HEAD` commit hash of the docs directory (`None` if it isn't a git repo)
+- `build_info` : the builder name (e.g. `html`), the build's start time (UTC), and `total_wall_time`, the whole build time, start to finish
 - `events` : one record per event emission (when it started, how long it took, how deeply nested it was, etc.)
 - `calls` : one record per handler call (which handler, which event, which extension it came from, how long it took, etc.)
 

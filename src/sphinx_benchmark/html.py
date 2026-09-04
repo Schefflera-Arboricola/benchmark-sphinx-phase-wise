@@ -174,6 +174,8 @@ def _page(title: str, current: str, body: str, s: BuildSummary) -> str:
         f'<a href="{fname}"{' class="current"' if fname == current else ""}>{label}</a>'
         for fname, label in _PAGES
     )
+    p = s.project_info
+    project = escape(f"{p.get('name', '')} {p.get('version', '')}".strip())
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,6 +188,7 @@ def _page(title: str, current: str, body: str, s: BuildSummary) -> str:
 <body>
 <header>
   <span class="brand">sphinx-benchmark</span>
+  <span class="project">{project}</span>
   <nav>{nav}</nav>
   <span class="wall">wall clock {s.total_build_time:.3f}s</span>
 </header>
@@ -244,8 +247,16 @@ def _overview_body(s: BuildSummary, links: _Links) -> str:
         stops.append(f"#d9d9d9 {acc:.3f}% 100%")
 
     outside_pct = s.pct(s.total_build_time - s.time_in_events)
+    p, b = s.project_info, s.build_info
+    info = ""
+    if p or b:
+        info = f"""
+<p class="meta">Project: <b>{escape(str(p.get("name", "-")))} {escape(str(p.get("version", "")))}</b>
+ · HEAD: <code>{escape(str(p.get("HEAD") or "-"))}</code>
+ · Builder: <b>{escape(str(b.get("builder", "-")))}</b>
+ · Started: {escape(str(b.get("start_time", "-")))}</p>"""
     body = f"""
-<h1>Where the build time went</h1>
+<h1>Where the build time went</h1>{info}
 <div class="stats">
   <div><b>{s.total_build_time:.3f}s</b> wall clock</div>
   <div><b>{s.time_in_events:.3f}s</b> inside events (own time) ({s.pct(s.time_in_events):.2f}%)</div>
@@ -561,6 +572,7 @@ body { margin: 0; background: var(--bg); color: var(--ink);
 header { display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap;
   padding: .8rem 1.5rem; border-bottom: 2px solid var(--accent); background: var(--panel); }
 .brand { font-family: var(--mono); font-weight: 700; color: var(--accent); }
+.project { font-weight: 600; }
 nav a { margin-right: 1rem; color: var(--muted); text-decoration: none; }
 nav a.current { color: var(--accent); font-weight: 600;
   border-bottom: 2px solid var(--accent); }

@@ -22,6 +22,19 @@ _COL_HEADER = (
 _WIDTH = len(_COL_HEADER)
 
 
+def print_build_info(s: BuildSummary) -> None:
+    """Print the project and build info recorded in the JSON (if any)."""
+    p, b = s.project_info, s.build_info
+    if not p and not b:
+        return
+    print()
+    print(
+        f"Project: {p.get('name', '-')} {p.get('version', '')}  |  "
+        f"HEAD: {p.get('HEAD') or '-'}"
+    )
+    print(f"Builder: {b.get('builder', '-')}  |  Started: {b.get('start_time', '-')}")
+
+
 def print_summary(s: BuildSummary) -> None:
     """Print the per-event handler tables and the gaps summary table."""
     print()
