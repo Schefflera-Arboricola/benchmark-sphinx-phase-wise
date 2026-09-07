@@ -131,12 +131,14 @@ def test_run_table_and_html(tmp_path, capsys):
     assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
     for name in ("index.html", "events.html", "gaps.html", "style.css", "report.js"):
         assert (report / name).exists()
-    index = (report / "index.html").read_text()
+    index = (report / "index.html").read_text(encoding="utf-8")
     assert "conic-gradient" in index
     assert '<span class="project">proj 1.0</span>' in index
     assert "abc123" in index and "2026-01-01 00:00:00 UTC" in index
     assert "Someone" not in index  # copyright is not printed
-    assert '<span class="project">proj 1.0</span>' in (report / "gaps.html").read_text()
+    assert '<span class="project">proj 1.0</span>' in (report / "gaps.html").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_run_default_overview(tmp_path, capsys):
@@ -218,22 +220,24 @@ def test_html_detail_pages(tmp_path):
     report = tmp_path / "report"
     assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
 
-    events_html = (report / "events.html").read_text()
+    events_html = (report / "events.html").read_text(encoding="utf-8")
     assert 'href="event-builder-inited.html"' in events_html
     assert 'href="handler-gen_gallery.html?event=builder-inited"' in events_html
 
-    gaps_html = (report / "gaps.html").read_text()
+    gaps_html = (report / "gaps.html").read_text(encoding="utf-8")
     assert 'href="gap-builder-inited----doctree-read.html"' in gaps_html
 
-    handler_page = (report / "handler-process_docs.html").read_text()
+    handler_page = (report / "handler-process_docs.html").read_text(encoding="utf-8")
     assert 'id="event-filter"' in handler_page  # per-event dropdown
     assert "All events" in handler_page
     assert 'class="sortable"' in handler_page
 
-    event_page = (report / "event-builder-inited.html").read_text()
+    event_page = (report / "event-builder-inited.html").read_text(encoding="utf-8")
     assert "1 recorded emissions" in event_page
 
-    gap_page = (report / "gap-builder-inited----doctree-read.html").read_text()
+    gap_page = (report / "gap-builder-inited----doctree-read.html").read_text(
+        encoding="utf-8"
+    )
     assert "1 occurrences" in gap_page and "0.200000" in gap_page
 
 
@@ -265,7 +269,7 @@ def test_html_long_handler_name(tmp_path):
     assert all(len(name) < 120 for name in handler_pages)
     # the events page links to the truncated filename
     long_page = next(p for p in handler_pages if "functools" in p)
-    assert f'href="{long_page}' in (report / "events.html").read_text()
+    assert f'href="{long_page}' in (report / "events.html").read_text(encoding="utf-8")
 
 
 def test_missing_file_exits_with_message(tmp_path):
