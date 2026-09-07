@@ -30,9 +30,11 @@ This is a Sphinx extension that benchmarks and profiles a docs build process [ev
    sphinx-build -b html docs/ docs/_build/html
    ```
 
-   The build generates a `sphinx_benchmarks.json` in the present working directory.
+   The build generates a `sphinx_benchmarks_<date>-<build's start time>_<HEAD commit's last 7 chars>.json` in the present working
+   directory (e.g. `sphinx_benchmarks_20260907-143012_306917b.json`).
 
-4. Change the directory to the build directory (where the generated `sphinx_benchmarks.json` is present) and run:
+4. Change the directory to the build directory (where the generated `sphinx_benchmarks_*.json` is present) and run
+   the following. It picks the most recent `sphinx_benchmarks_*.json`, or pass a specific one with `--input`:
 
    ```bash
    sphinx-benchmark run
