@@ -60,7 +60,7 @@ def print_events(s: BuildSummary) -> None:
         )
         print("=" * width)
         print(
-            f"{ev.name}  —  {ev.own_time:.6f}s own time "
+            f"{ev.name}  -  {ev.own_time:.6f}s own time "
             f"({s.pct(ev.own_time):.2f}% of build)  |  "
             f"{ev.emissions} emissions"
             f"{nested_str}  |  depth {depth_str}"
@@ -198,7 +198,7 @@ def print_emissions(
     total_own = sum(r.own_time for r in rows if r.own_time is not None)
     print()
     print("=" * width)
-    print(f"Emissions of '{event_name}'  —  {len(rows)} recorded")
+    print(f"Emissions of '{event_name}'  -  {len(rows)} recorded")
     print("=" * width)
     print(header)
     print("-" * width)
@@ -242,7 +242,7 @@ def print_handler_calls(
     scope = f" during '{event_name}'" if event_name else ""
     print()
     print("=" * width)
-    print(f"Calls of '{handler_name}'{scope}  —  {len(rows)} recorded")
+    print(f"Calls of '{handler_name}'{scope}  -  {len(rows)} recorded")
     print("=" * width)
     print(header)
     print("-" * width)
@@ -267,7 +267,7 @@ def print_gap_occurrences(
     total = sum(r.duration for r in rows)
     print()
     print("=" * width)
-    print(f"Gaps between '{source}' -> '{target}'  —  {len(rows)} occurrences")
+    print(f"Gaps between '{source}' -> '{target}'  -  {len(rows)} occurrences")
     print("=" * width)
     print(header)
     print("-" * width)

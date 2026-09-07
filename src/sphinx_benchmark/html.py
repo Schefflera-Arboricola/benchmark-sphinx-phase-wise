@@ -538,7 +538,7 @@ def write_report(s: BuildSummary, out_dir: str, data: dict, json_path: str = "")
     links = _Links(data, s)
 
     def write(fname: str, content: str) -> None:
-        with open(os.path.join(out_dir, fname), "w") as f:
+        with open(os.path.join(out_dir, fname), "w", encoding="utf-8") as f:
             f.write(content)
 
     write(
