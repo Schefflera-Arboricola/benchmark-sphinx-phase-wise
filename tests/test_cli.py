@@ -1,4 +1,5 @@
 import json
+import os
 import pytest
 from sphinx_benchmark.cli import main
 from sphinx_benchmark.summary import compute_summary
@@ -270,3 +271,20 @@ def test_html_long_handler_name(tmp_path):
 def test_missing_file_exits_with_message(tmp_path):
     with pytest.raises(SystemExit, match="not found"):
         main(["run", "table", "-i", str(tmp_path / "nope.json")])
+
+
+def test_default_input_is_latest_benchmarks_file(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(SystemExit, match="no sphinx_benchmarks\\*.json found"):
+        main(["run"])
+
+    old = tmp_path / "sphinx_benchmarks_20260101-000000_aaaaaaa.json"
+    new = tmp_path / "sphinx_benchmarks_20260102-000000_bbbbbbb.json"
+    old.write_text(json.dumps(SAMPLE))
+    newer = json.loads(json.dumps(SAMPLE))
+    newer["project_info"]["name"] = "newer-project"
+    new.write_text(json.dumps(newer))
+    os.utime(old, (1, 1))
+
+    assert main(["run"]) == 0
+    assert "newer-project" in capsys.readouterr().out

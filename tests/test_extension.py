@@ -1,4 +1,5 @@
 import json
+import re
 import time
 import types
 import pytest
@@ -276,7 +277,12 @@ def test_real_build_benchmarks(tmp_path, monkeypatch):
     )
     app.build()
 
-    data = json.loads((tmp_path / "sphinx_benchmarks.json").read_text())
+    # sphinx_benchmarks_<date>-<time>[_<short HEAD>].json
+    (json_path,) = tmp_path.glob("sphinx_benchmarks_*.json")
+    assert re.fullmatch(
+        r"sphinx_benchmarks_\d{8}-\d{6}(_[0-9a-f]{7})?\.json", json_path.name
+    )
+    data = json.loads(json_path.read_text())
 
     assert data["build_info"]["total_wall_time"] > 0
     assert data["build_info"]["builder"] == "html"
