@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import glob
 import os
 import sys
 
@@ -47,8 +48,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sphinx-benchmark",
         description=(
-            "Summarise the sphinx_benchmarks.json written by the "
-            "sphinx-benchmark extension during a Sphinx build."
+            "Summarise the sphinx_benchmarks_<date>-<time>_<commit>.json "
+            "written by the sphinx-benchmark extension during a Sphinx build."
         ),
     )
     parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
@@ -95,9 +96,12 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "-i",
         "--input",
-        default="sphinx_benchmarks.json",
+        default=None,
         metavar="JSON",
-        help="path to the benchmarks JSON (default: %(default)s)",
+        help=(
+            "path to the benchmarks JSON (default: the latest "
+            "sphinx_benchmarks*.json in the current directory)"
+        ),
     )
     run.add_argument(
         "-o",
@@ -215,8 +219,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "html" and args.selector:
         parser.error("'run html' takes no selector arguments")
 
+    path = args.input
+    if path is None:
+        # picking the most recent json in the pwd
+        candidates = glob.glob("sphinx_benchmarks*.json")
+        if not candidates:
+            sys.exit(
+                "no sphinx_benchmarks*.json found in the current directory: run "
+                "the build with the extension enabled, try changing the pwd, or "
+                "pass -i"
+            )
+        path = max(candidates, key=os.path.getmtime)
+
     try:
-        data = load_records(args.input)
+        data = load_records(path)
     except BenchmarkFileError as e:
         sys.exit(str(e))
 
@@ -227,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.format == "table":
         _run_table(parser, data, args.selector)
     else:
-        out_dir = write_report(compute_summary(data), args.output_dir, data)
+        out_dir = write_report(compute_summary(data), args.output_dir, data, path)
         print(f"Report written: open {os.path.join(out_dir, 'index.html')}")
     return 0
 

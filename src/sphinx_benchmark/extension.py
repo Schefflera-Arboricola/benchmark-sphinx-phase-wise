@@ -269,7 +269,8 @@ class EventLogger:
     def write_json(
         self, project_info, build_info, filename: str = "sphinx_benchmarks.json"
     ) -> None:
-        """Write all recorded handler calls to a JSON file.
+        """Write all recorded handler calls to a JSON file. The default filename
+        format is ``sphinx_benchmarks_YYYYMMDD-HHMMSS_[HEAD's last 7 char].json``.
 
         The json has a four top-level keys:
 
@@ -499,11 +500,15 @@ def build_finished(app: Sphinx, exception) -> None:
             # CalledProcessError : it's not a git repo; FileNotFoundError : git is not installed
             print("no git HEAD found:", e)
             project_info["HEAD"] = None
-        recorder.write_json(project_info=project_info, build_info=build_info)
-        print(
-            "sphinx_benchmarks.json written to "
-            f"{os.path.abspath('sphinx_benchmarks.json')}"
+
+        filename = "sphinx_benchmarks_" + recorder.start_ts.strftime("%Y%m%d-%H%M%S")
+        if project_info["HEAD"]:
+            filename += "_" + project_info["HEAD"][:7]
+        filename += ".json"
+        recorder.write_json(
+            project_info=project_info, build_info=build_info, filename=filename
         )
+        print(f"{filename} written to {os.path.abspath(filename)}")
     except Exception as e:
         logger.warning("Benchmarking extension failed: %s", e, exc_info=True)
 
