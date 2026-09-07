@@ -17,6 +17,7 @@ from .summary import (
     load_records,
 )
 from .table import (
+    print_build_info,
     print_emissions,
     print_events,
     print_gap_occurrences,
@@ -122,6 +123,7 @@ def _run_table(
 ) -> None:
     """Dispatch ``run table [selector...]`` to the right printer."""
     s = compute_summary(data)
+    print_build_info(s)
 
     if not selector:
         print_summary(s)
@@ -219,7 +221,9 @@ def main(argv: list[str] | None = None) -> int:
         sys.exit(str(e))
 
     if args.format is None:
-        print_overview(compute_summary(data), top)
+        s = compute_summary(data)
+        print_build_info(s)
+        print_overview(s, top)
     elif args.format == "table":
         _run_table(parser, data, args.selector)
     else:

@@ -5,7 +5,17 @@ from sphinx_benchmark.summary import compute_summary
 
 
 SAMPLE = {
-    "total_wall_time": 10.0,
+    "project_info": {
+        "name": "proj",
+        "version": "1.0",
+        "copyright": "2026, Someone",
+        "HEAD": "abc123",
+    },
+    "build_info": {
+        "builder": "html",
+        "start_time": "2026-01-01 00:00:00 UTC",
+        "total_wall_time": 10.0,
+    },
     "calls": [
         {
             "event": "builder-inited",
@@ -112,12 +122,20 @@ def test_run_table_and_html(tmp_path, capsys):
     assert main(["run", "table", "-i", str(json_path)]) == 0
     out = capsys.readouterr().out
     assert "builder-inited" in out and "Gaps Summary" in out
+    assert "Project: proj 1.0  |  HEAD: abc123" in out
+    assert "Builder: html  |  Started: 2026-01-01 00:00:00 UTC" in out
+    assert "Someone" not in out  # copyright is not printed
 
     report = tmp_path / "report"
     assert main(["run", "html", "-i", str(json_path), "-o", str(report)]) == 0
     for name in ("index.html", "events.html", "gaps.html", "style.css", "report.js"):
         assert (report / name).exists()
-    assert "conic-gradient" in (report / "index.html").read_text()
+    index = (report / "index.html").read_text()
+    assert "conic-gradient" in index
+    assert '<span class="project">proj 1.0</span>' in index
+    assert "abc123" in index and "2026-01-01 00:00:00 UTC" in index
+    assert "Someone" not in index  # copyright is not printed
+    assert '<span class="project">proj 1.0</span>' in (report / "gaps.html").read_text()
 
 
 def test_run_default_overview(tmp_path, capsys):
