@@ -11,7 +11,7 @@ Every build with this extension enabled creates a `sphinx_benchmarks.json` file 
 - `events` : one record per event emission (when it started, how long it took, how deeply nested it was, etc.)
 - `calls` : one record per handler call (which handler, which event, which extension it came from, how long it took, etc.)
 
-The summary script uses the data in the above JSON file to print out the two benchamrks summary tables. 
+The `sphinx-benchmark run table` command uses the data in the above JSON file to print out the two benchamrks summary tables. 
 
 ## Table 1 : where time goes inside events
 
@@ -48,6 +48,11 @@ Two numbers close each block:
   normally small. If it's large, the time is going somewhere the per-handler timers
   can't see.
 
+You can further see the break-down of each event emission using the 
+`sphinx-benchamrk run table events <event_name>`, and see the break down of each
+handler call using either `sphinx-benchamrk run table events <handler_name>` or
+`sphinx-benchamrk run table events <event_name> <handler_name>` commands.
+
 At the very bottom:
 
 ```
@@ -74,3 +79,6 @@ to 30s (about 33ms gap each time, 11.65% of the build).
 
 If you ever see a `WARNING: negative gaps` line, two top-level emissions
 overlapped, that shouldn't happen, so please report an issue for it.
+
+You can further see the break-down of each gap using the 
+`sphinx-benchmark run table gaps <start-event> <end-event>` command.
