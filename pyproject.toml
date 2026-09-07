@@ -2,12 +2,6 @@
 requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/sphinx_benchmark"]
-
-[project.scripts]
-sphinx-benchmark = "sphinx_benchmark.cli:main"
-
 [project]
 name = "sphinx-benchmark"
 version = "0.1.0"
@@ -27,3 +21,18 @@ email = "aditijuneja7@gmail.com"
 [project.urls]
 "Bug Tracker" = 'https://github.com/Schefflera-Arboricola/sphinx-benchmark/issues'
 "Source Code" = 'https://github.com/Schefflera-Arboricola/sphinx-benchmark'
+
+[project.scripts]
+sphinx-benchmark = "sphinx_benchmark.cli:main"
+
+[dependency-groups]
+test = [
+    "pytest>=8.3",
+]
+dev = [
+    { include-group = "test" },
+    "pre-commit>=4.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sphinx_benchmark"]
